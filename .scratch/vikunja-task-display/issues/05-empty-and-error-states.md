@@ -4,8 +4,8 @@
 
 **Blocked by:** 01 Walking skeleton
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Empty Task response renders "No open tasks"
-- [ ] Failed or unauthorised response renders a short error message
-- [ ] Fixture-render tests cover both states
+- [x] Empty Task response renders "No open tasks"
+- [x] Failed or unauthorised response renders a short error message
+- [x] Fixture-render tests cover both states
