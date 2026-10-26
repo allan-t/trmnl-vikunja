@@ -35,4 +35,27 @@ RSpec.describe 'Full layout' do
 
     expect(render(mocks: vikunja_mocks(tasks:))).to have_text(/Dated B.*Dated D.*Undated A.*Undated C/m)
   end
+
+  it 'shows "No open tasks" when there are no open Tasks' do
+    expect(render(mocks: vikunja_mocks(tasks: []))).to have_text('No open tasks')
+  end
+
+  it 'shows an error message when Vikunja rejects the token' do
+    mocks = {
+      "#{BASE_URL}/api/v1/tasks" => { status: 401, json: { code: 1011, message: 'invalid token' } },
+      "#{BASE_URL}/api/v1/projects" => { status: 401, json: { code: 1011, message: 'invalid token' } }
+    }
+    screen = render(mocks:)
+
+    expect(screen).to have_text(/Could not load tasks/)
+    expect(screen).not_to have_text('No open tasks')
+    expect(screen).not_to have_text('secret-token')
+  end
+
+  it 'shows an error message when Vikunja is down' do
+    screen = render(mocks: { '*' => { status: 500, body: '' } })
+
+    expect(screen).to have_text(/Could not load tasks/)
+    expect(screen).not_to have_text('No open tasks')
+  end
 end
