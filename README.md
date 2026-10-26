@@ -29,6 +29,18 @@ Renders every layout, grouped and ungrouped, into `docs/screenshots/<layout>-<gr
 
 Never commit a `.trmnlp.yml` with resolved values: `docker compose up` rewrites it, so keep the `{{ env.* }}` placeholders.
 
+## Deployment safety for the private plugin
+
+This repo is the source of truth for the private TRMNL plugin. Keep the live recipe in sync from this repo, not by editing the TRMNL dashboard and treating it as the canonical copy. This is repo-side documentation, not a wizard: the repository files are what must be reviewed and pushed.
+
+- private plugin: the deploy path is for the repo's private plugin, not a public or shared recipe. Deploys should happen only from the checked-in repo state and only after the repo is clean and reviewed.
+- source of truth: `src/settings.yml` is the canonical configuration for the plugin id, name, description, and custom fields. If the live plugin differs from the repo, fix the repo first and then redeploy.
+- sync-bot conflict: do not run the sync-bot while a manual deploy is in flight. The sync-bot may rewrite the same plugin metadata or settings and conflict with the repo's values, especially the live URL and API token.
+- plugin id contract: the plugin id is a contract with the live deployment. `src/settings.yml` must keep `id: 520678`, and the deploy job fails before pushing if that value is missing or changed.
+- first deploy verification: after the first deploy, confirm the live URL and token are not reset. If the live URL or API token has been blanked, reset, or replaced, stop; restore the repo's expected settings and verify the live values before any additional deploys.
+
+The deploy workflow is intentionally conservative: it tests and lints first, then enforces the plugin id guard before the `trmnlp push` call to avoid accidentally publishing the wrong plugin configuration.
+
 ## Adding a test
 
 Render the template with a fixed clock and mocked Vikunja responses, then assert on the visible text. One spec file per behaviour; Liquid partials live in `src/shared.liquid`:

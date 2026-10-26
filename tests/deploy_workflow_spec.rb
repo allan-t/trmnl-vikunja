@@ -3,6 +3,7 @@
 RSpec.describe 'deployment workflow gates' do
   let(:workflow_path) { File.expand_path('../.github/workflows/test.yml', __dir__) }
   let(:workflow) { File.read(workflow_path) }
+  let(:readme) { File.read(File.expand_path('../README.md', __dir__)) }
 
   it 'keeps the test and deploy jobs in the same workflow' do
     expect(workflow).to include('jobs:')
@@ -26,5 +27,13 @@ RSpec.describe 'deployment workflow gates' do
 
   it 'fails before deploying if the plugin id is not set' do
     expect(workflow).to include("grep -q '^id: 520678$' src/settings.yml")
+  end
+
+  it 'documents the private-plugin deploy safety rules in the repo docs' do
+    expect(readme).to include('private plugin')
+    expect(readme).to include('source of truth')
+    expect(readme).to include('sync-bot')
+    expect(readme).to include('plugin id contract')
+    expect(readme).to include('first deploy')
   end
 end
