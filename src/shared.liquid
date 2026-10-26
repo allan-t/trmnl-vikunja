@@ -46,9 +46,18 @@
 </div>
 {% endtemplate %}
 
+{% template task_rows %}
+{% comment %} Expects tasks (already capped), projects, dated_from, utc_offset, today_day. {% endcomment %}
+{% for task in tasks %}
+  {% assign project = projects | where: 'id', task.project_id | first %}
+  {% render 'task_row', task: task, project: project, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
+{% endfor %}
+{% endtemplate %}
+
 {% template task_screen %}
 {% comment %}
-  Expects tasks (open Tasks, first page), projects and utc_offset.
+  Expects tasks (open Tasks, first page), projects, utc_offset and columns (1 or 2, default 1).
+  Two columns fill the first before the second.
   Tasks carry only project_id, so the Project name is looked up in projects.
 {% endcomment %}
 {% assign row_cap = 8 %}
@@ -67,24 +76,32 @@
   {% assign tasks = dated | concat: undated %}
 {% endif %}
 {% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
+{% assign columns = columns | default: 1 %}
 {% assign hidden_count = tasks.size | minus: row_cap %}
 
-<div class="layout layout--col">
-  <div class="list">
-    {% if load_ok == false %}
-      {% render 'error_state' %}
-    {% elsif tasks.size == 0 %}
-      {% render 'empty_state' %}
+<div class="layout{% if columns == 1 %} layout--col{% endif %}">
+  {% if load_ok == false %}
+    <div class="list">{% render 'error_state' %}</div>
+  {% elsif tasks.size == 0 %}
+    <div class="list">{% render 'empty_state' %}</div>
+  {% else %}
+    {% assign shown = tasks | slice: 0, row_cap %}
+    {% if columns == 2 %}
+      {% assign first_size = shown.size | plus: 1 | divided_by: 2 %}
+      {% assign left = shown | slice: 0, first_size %}
+      {% assign right = shown | slice: first_size, first_size %}
+      <div class="columns">
+        <div class="column"><div class="list">{% render 'task_rows', tasks: left, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
+        <div class="column"><div class="list">{% render 'task_rows', tasks: right, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
+      </div>
+    {% else %}
+      <div class="list">{% render 'task_rows', tasks: shown, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div>
     {% endif %}
-    {% if load_ok %}{% for task in tasks limit: row_cap %}
-      {% assign project = projects | where: 'id', task.project_id | first %}
-      {% render 'task_row', task: task, project: project, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
-    {% endfor %}{% endif %}
-    {% if load_ok and hidden_count > 0 %}
-      {% render 'overflow_footer', hidden_count: hidden_count %}
-    {% endif %}
-  </div>
+  {% endif %}
 </div>
+{% if load_ok and hidden_count > 0 %}
+  {% render 'overflow_footer', hidden_count: hidden_count %}
+{% endif %}
 
 <div class="title_bar">
   <span class="title">Vikunja Tasks</span>
