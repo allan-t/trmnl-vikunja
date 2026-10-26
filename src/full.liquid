@@ -4,10 +4,12 @@
 {% endcomment %}
 {% assign tasks = IDX_0.data %}
 {% assign projects = IDX_1.data %}
+{% assign row_cap = 8 %}
+{% assign hidden_count = tasks.size | minus: row_cap %}
 
 <div class="layout layout--col">
   <div class="list">
-    {% for task in tasks %}
+    {% for task in tasks limit: row_cap %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
         <div class="content">
@@ -15,6 +17,9 @@
         </div>
       </div>
     {% endfor %}
+    {% if hidden_count > 0 %}
+      <div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
+    {% endif %}
   </div>
 </div>
 

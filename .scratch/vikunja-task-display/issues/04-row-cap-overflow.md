@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 Walking skeleton
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] No more than the cap of Task rows renders
-- [ ] Footer shows the correct "+N more" count when Tasks overflow
-- [ ] No footer when everything fits
-- [ ] Fixture-render tests cover under, at and over the cap
+- [x] No more than the cap of Task rows renders
+- [x] Footer shows the correct "+N more" count when Tasks overflow
+- [x] No footer when everything fits
+- [x] Fixture-render tests cover under, at and over the cap
