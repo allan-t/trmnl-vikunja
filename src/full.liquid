@@ -2,8 +2,12 @@
   IDX_0.data = open Tasks (first page), IDX_1.data = Projects.
   Tasks carry only project_id, so the Project name is looked up in IDX_1.
 {% endcomment %}
-{% assign tasks = IDX_0.data %}
 {% assign projects = IDX_1.data %}
+{% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
+{% assign dated = IDX_0.data | where_exp: 't', 't.due_date != "0001-01-01T00:00:00Z"' %}
+{% assign undated = IDX_0.data | where_exp: 't', 't.due_date == "0001-01-01T00:00:00Z"' %}
+{% assign tasks = dated | concat: undated %}
+{% assign today_day = 'now' | date: '%s' | divided_by: 86400 %}
 
 <div class="layout layout--col">
   <div class="list">
@@ -12,6 +16,12 @@
       <div class="item task">
         <div class="content">
           <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
+          {% if task.due_date != "0001-01-01T00:00:00Z" %}
+            {% assign days_until = task.due_date | date: '%s' | divided_by: 86400 | minus: today_day %}
+            <span class="description label task-due">
+              {% if days_until < 0 %}Overdue {{ days_until | abs }}d{% elsif days_until == 0 %}Today{% elsif days_until == 1 %}Tomorrow{% else %}{{ task.due_date | date: '%-d %b' }}{% endif %}
+            </span>
+          {% endif %}
         </div>
       </div>
     {% endfor %}

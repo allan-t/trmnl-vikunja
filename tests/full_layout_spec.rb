@@ -11,4 +11,28 @@ RSpec.describe 'Full layout' do
 
     expect(screen).to have_text(/Admin - Renew passport.*Home - Buy milk.*Work - Write report/m)
   end
+
+  def task(id, due, title: "T#{id}") = { id:, title:, project_id: 10, done: false, priority: 0, due_date: due }
+  def labels_for(due) = render(mocks: vikunja_mocks(tasks: [task(1, due)]))
+
+  describe 'due date labels' do
+    it('says Today for a due date later today') { expect(labels_for('2030-01-01T18:00:00Z')).to have_text('Today') }
+    it('says Tomorrow for the next day') { expect(labels_for('2030-01-02T09:00:00Z')).to have_text('Tomorrow') }
+    it('says Overdue 1d for yesterday') { expect(labels_for('2029-12-31T09:00:00Z')).to have_text('Overdue 1d') }
+    it('says Overdue 5d for five days ago') { expect(labels_for('2029-12-27T09:00:00Z')).to have_text('Overdue 5d') }
+    it('shows an absolute date for far dates') { expect(labels_for('2030-11-12T09:00:00Z')).to have_text('12 Nov') }
+
+    it 'shows no date line for an unset due date' do
+      screen = labels_for('0001-01-01T00:00:00Z')
+
+      expect(screen).not_to have_text(/Today|Tomorrow|Overdue|Jan/)
+    end
+  end
+
+  it 'lists undated Tasks last, keeping the given order otherwise' do
+    tasks = [task(1, '0001-01-01T00:00:00Z', title: 'Undated A'), task(2, '2030-01-05T09:00:00Z', title: 'Dated B'),
+             task(3, '0001-01-01T00:00:00Z', title: 'Undated C'), task(4, '2030-01-06T09:00:00Z', title: 'Dated D')]
+
+    expect(render(mocks: vikunja_mocks(tasks:))).to have_text(/Dated B.*Dated D.*Undated A.*Undated C/m)
+  end
 end
