@@ -19,3 +19,11 @@ _Avoid_: List, board
 **Priority**:
 A Vikunja Task's importance, from 0 (unset) to 5, shown on the display as an icon.
 _Avoid_: Urgency, importance
+
+**Layout**:
+One of TRMNL's four screen-area sizes a Recipe renders for: full, half horizontal, half vertical, quadrant.
+_Avoid_: View, size, template
+
+**Deploy**:
+Uploading the Recipe to a TRMNL account as a private plugin, so TRMNL's servers render it for the device.
+_Avoid_: Publish, release, push to device
