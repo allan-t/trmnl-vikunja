@@ -1,0 +1,11 @@
+services:
+  preview:
+    image: trmnl/trmnlp
+    command: serve
+    ports:
+      - "4567:4567"
+    volumes:
+      - .:/plugin
+    environment:
+      VIKUNJA_BASE_URL: ${VIKUNJA_BASE_URL:-}
+      VIKUNJA_API_TOKEN: ${VIKUNJA_API_TOKEN:-}
