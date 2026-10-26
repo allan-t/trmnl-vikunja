@@ -36,27 +36,33 @@
 {% endtemplate %}
 
 {% template task_row %}
-{% comment %} Expects task, project (may be nil), dated_from, utc_offset, today_day. {% endcomment %}
+{% comment %} Expects task, project (may be nil), grouped, dated_from, utc_offset, today_day. {% endcomment %}
 <div class="item task">
   {% render 'priority_icon', priority: task.priority %}
   <div class="content">
-    <span class="title title--small task-title">{% if project.title %}{{ project.title }} - {% endif %}{{ task.title }}</span>
+    <span class="title title--small task-title">{% if project.title and grouped == false %}{{ project.title }} - {% endif %}{{ task.title }}</span>
     {% render 'due_label', due_date: task.due_date, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
   </div>
 </div>
 {% endtemplate %}
 
 {% template task_rows %}
-{% comment %} Expects tasks (already capped), projects, dated_from, utc_offset, today_day. {% endcomment %}
+{% comment %} Expects tasks (already capped), projects, grouped, dated_from, utc_offset, today_day. Grouped rows get a Project header whenever the Project changes. {% endcomment %}
+{% assign previous_project_id = nil %}
 {% for task in tasks %}
   {% assign project = projects | where: 'id', task.project_id | first %}
-  {% render 'task_row', task: task, project: project, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
+  {% if grouped and project.title and task.project_id != previous_project_id %}
+    <div class="item group-header"><span class="label label--underline">{{ project.title }}</span></div>
+  {% endif %}
+  {% assign previous_project_id = task.project_id %}
+  {% render 'task_row', task: task, project: project, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
 {% endfor %}
 {% endtemplate %}
 
 {% template task_screen %}
 {% comment %}
   Expects tasks (open Tasks, first page), projects, utc_offset and columns (1 or 2, default 1).
+  grouped (default true) lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second.
   Tasks carry only project_id, so the Project name is looked up in projects.
 {% endcomment %}
@@ -77,6 +83,7 @@
 {% endif %}
 {% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
 {% assign columns = columns | default: 1 %}
+{% if grouped == nil %}{% assign grouped = true %}{% endif %}
 {% assign hidden_count = tasks.size | minus: row_cap %}
 
 <div class="layout{% if columns == 1 %} layout--col{% endif %}">
@@ -86,16 +93,25 @@
     <div class="list">{% render 'empty_state' %}</div>
   {% else %}
     {% assign shown = tasks | slice: 0, row_cap %}
+    {% if grouped %}
+      {% assign project_ids = shown | map: 'project_id' | uniq %}
+      {% assign regrouped = '' | split: ',' %}
+      {% for project_id in project_ids %}
+        {% assign in_project = shown | where: 'project_id', project_id %}
+        {% assign regrouped = regrouped | concat: in_project %}
+      {% endfor %}
+      {% assign shown = regrouped %}
+    {% endif %}
     {% if columns == 2 %}
       {% assign first_size = shown.size | plus: 1 | divided_by: 2 %}
       {% assign left = shown | slice: 0, first_size %}
       {% assign right = shown | slice: first_size, first_size %}
       <div class="columns">
-        <div class="column"><div class="list">{% render 'task_rows', tasks: left, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
-        <div class="column"><div class="list">{% render 'task_rows', tasks: right, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
+        <div class="column"><div class="list">{% render 'task_rows', tasks: left, projects: projects, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
+        <div class="column"><div class="list">{% render 'task_rows', tasks: right, projects: projects, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div></div>
       </div>
     {% else %}
-      <div class="list">{% render 'task_rows', tasks: shown, projects: projects, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div>
+      <div class="list">{% render 'task_rows', tasks: shown, projects: projects, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div>
     {% endif %}
   {% endif %}
 </div>

@@ -23,6 +23,11 @@ custom_fields:
     field_type: password
     name: Vikunja API token
     description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
+  - keyname: group_by_project
+    field_type: boolean
+    name: Group by Project
+    description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
+    default: true
   - keyname: author_bio
     field_type: author_bio
     name: About This Recipe

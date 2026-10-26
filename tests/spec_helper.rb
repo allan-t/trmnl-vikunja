@@ -9,7 +9,8 @@ SHARED_TEMPLATE = File.expand_path('../src/shared.liquid', __dir__)
 # Single source of truth: the cap lives in the shared partials; specs read it from there.
 ROW_CAP = File.read(SHARED_TEMPLATE)[/assign\s+row_cap\s*=\s*(\d+)/, 1]&.to_i or raise 'row_cap not found in src/shared.liquid'
 UNSET_DUE_DATE = '0001-01-01T00:00:00Z'
-CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token' }.freeze
+# Grouping is off so specs read plain "Project - Task" rows; grouping_spec.rb turns it on.
+CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token', group_by_project: false }.freeze
 
 def fixture_json(name) = JSON.parse(File.read(File.join(__dir__, 'fixtures', "#{name}.json")))
 
