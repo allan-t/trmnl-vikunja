@@ -5,19 +5,27 @@
 {% assign tasks = IDX_0.data %}
 {% assign projects = IDX_1.data %}
 {% assign row_cap = 8 %}
+{% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
+{% assign tasks_json = tasks | json %}
+{% assign tasks_first_char = tasks_json | slice: 0 %}
 {% assign hidden_count = tasks.size | minus: row_cap %}
 
 <div class="layout layout--col">
   <div class="list">
-    {% for task in tasks limit: row_cap %}
+    {% if tasks_first_char != '[' %}
+      <div class="item"><div class="content"><span class="title title--small task-error">Could not load tasks. Check the Vikunja URL and API token.</span></div></div>
+    {% elsif tasks.size == 0 %}
+      <div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
+    {% endif %}
+    {% if tasks_first_char == '[' %}{% for task in tasks limit: row_cap %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
         <div class="content">
           <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
         </div>
       </div>
-    {% endfor %}
-    {% if hidden_count > 0 %}
+    {% endfor %}{% endif %}
+    {% if tasks_first_char == '[' and hidden_count > 0 %}
       <div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
     {% endif %}
   </div>
