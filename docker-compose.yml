@@ -7,5 +7,5 @@ services:
     volumes:
       - .:/plugin
     environment:
-      VIKUNJA_BASE_URL: ${VIKUNJA_BASE_URL:-}
+      VIKUNJA_BASE_URL: ${VIKUNJA_BASE_URL:-https://app.vikunja.cloud}
       VIKUNJA_API_TOKEN: ${VIKUNJA_API_TOKEN:-}

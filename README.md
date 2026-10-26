@@ -6,7 +6,7 @@ A recipe for TRMNL for the task tracking app Vikunja
 Requires Docker; the `trmnl/trmnlp` image provides everything else. Run from the repo root:
 
 ```sh
-# Preview at http://localhost:4567 (copy .env.example to .env and set your Vikunja URL and token)
+# Preview at http://localhost:4567 (copy .env.example to .env and set VIKUNJA_API_TOKEN; the base URL defaults to https://app.vikunja.cloud)
 docker compose up
 
 # Run the RSpec tests in tests/ (fixture render + polling config)
