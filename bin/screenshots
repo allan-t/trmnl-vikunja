@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Regenerates docs/screenshots/*.png (every Layout, grouped and ungrouped) from fixture data and a fixed clock.
+# Needs Docker only: no Vikunja token, and .trmnlp.yml is never touched.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+docker run --rm -e SCREENSHOTS=1 -v "$PWD:/plugin" trmnl/trmnlp test tests/screenshots_spec.rb

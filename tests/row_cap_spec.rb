@@ -29,7 +29,7 @@ RSpec.describe 'Full layout row cap' do
 
   describe 'cap definition' do
     it 'is defined exactly once in the template' do
-      expect(File.read(FULL_TEMPLATE).scan(/assign\s+row_cap\b/).size).to eq(1)
+      expect(File.read(SHARED_TEMPLATE).scan(/assign\s+row_cap\b/).size).to eq(1)
     end
 
     it 'matches the cap the template actually applies' do

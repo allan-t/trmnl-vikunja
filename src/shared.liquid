@@ -1,5 +1,5 @@
 {% comment %}
-  Partials, rendered from full.liquid with {% render 'name', arg: value %}.
+  Partials, rendered from the layout files (full, half_horizontal, half_vertical, quadrant) with {% render 'name', arg: value %}.
   Rendered partials see only the arguments passed to them.
 {% endcomment %}
 {% template due_label %}
@@ -43,5 +43,50 @@
     <span class="title title--small task-title">{% if project.title %}{{ project.title }} - {% endif %}{{ task.title }}</span>
     {% render 'due_label', due_date: task.due_date, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
   </div>
+</div>
+{% endtemplate %}
+
+{% template task_screen %}
+{% comment %}
+  Expects tasks (open Tasks, first page), projects and utc_offset.
+  Tasks carry only project_id, so the Project name is looked up in projects.
+{% endcomment %}
+{% assign row_cap = 8 %}
+{% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
+{% assign dated_from = "1970" %}
+{% assign utc_offset = utc_offset | default: 0 %}
+{% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
+{% assign tasks_first_char = tasks | json | slice: 0 %}
+{% assign projects_first_char = projects | json | slice: 0 %}
+{% assign load_ok = false %}
+{% if tasks_first_char == '[' and projects_first_char == '[' %}{% assign load_ok = true %}{% endif %}
+{% if load_ok %}
+  {% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
+  {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
+  {% assign undated = tasks | where_exp: 't', 't.due_date < dated_from' %}
+  {% assign tasks = dated | concat: undated %}
+{% endif %}
+{% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
+{% assign hidden_count = tasks.size | minus: row_cap %}
+
+<div class="layout layout--col">
+  <div class="list">
+    {% if load_ok == false %}
+      {% render 'error_state' %}
+    {% elsif tasks.size == 0 %}
+      {% render 'empty_state' %}
+    {% endif %}
+    {% if load_ok %}{% for task in tasks limit: row_cap %}
+      {% assign project = projects | where: 'id', task.project_id | first %}
+      {% render 'task_row', task: task, project: project, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
+    {% endfor %}{% endif %}
+    {% if load_ok and hidden_count > 0 %}
+      {% render 'overflow_footer', hidden_count: hidden_count %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="title_bar">
+  <span class="title">Vikunja Tasks</span>
 </div>
 {% endtemplate %}

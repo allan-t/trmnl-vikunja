@@ -4,9 +4,10 @@ require 'json'
 
 BASE_URL = 'https://vikunja.example.com'
 FIXED_NOW = '2030-01-01T08:00:00Z'
-FULL_TEMPLATE = File.expand_path('../src/full.liquid', __dir__)
-# Single source of truth: the cap lives in the template; specs read it from there.
-ROW_CAP = File.read(FULL_TEMPLATE)[/assign\s+row_cap\s*=\s*(\d+)/, 1]&.to_i or raise 'row_cap not found in src/full.liquid'
+LAYOUTS = %w[full half_horizontal half_vertical quadrant].freeze
+SHARED_TEMPLATE = File.expand_path('../src/shared.liquid', __dir__)
+# Single source of truth: the cap lives in the shared partials; specs read it from there.
+ROW_CAP = File.read(SHARED_TEMPLATE)[/assign\s+row_cap\s*=\s*(\d+)/, 1]&.to_i or raise 'row_cap not found in src/shared.liquid'
 UNSET_DUE_DATE = '0001-01-01T00:00:00Z'
 CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token' }.freeze
 
@@ -26,8 +27,8 @@ def build_task(id = 1, **overrides)
 end
 
 module RenderHelpers
-  def render_screen(mocks: vikunja_mocks, variables: {})
-    trmnl.render(now: FIXED_NOW, custom_fields: CUSTOM_FIELDS, mocks:, variables:)
+  def render_screen(layout: 'full', mocks: vikunja_mocks, variables: {}, custom_fields: CUSTOM_FIELDS)
+    trmnl.render(view: layout, now: FIXED_NOW, custom_fields:, mocks:, variables:)
   end
 
   def render_tasks(tasks, **) = render_screen(mocks: vikunja_mocks(tasks:), **)

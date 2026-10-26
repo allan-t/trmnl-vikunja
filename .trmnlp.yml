@@ -3,7 +3,7 @@ watch:
 - ".trmnlp.yml"
 - src
 custom_fields:
-  base_url: https://app.vikunja.cloud
-  api_token: tk_2808d1cecc3f91e480eafe23467ce671a3a83b8c
+  base_url: "{{ env.VIKUNJA_BASE_URL }}"
+  api_token: "{{ env.VIKUNJA_API_TOKEN }}"
 variables:
   trmnl: {}
