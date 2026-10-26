@@ -10,6 +10,11 @@
     {% for task in tasks %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
+        {% if task.priority >= 4 %}
+          <span class="label label--inverted priority priority--high" aria-label="High priority">!!</span>
+        {% elsif task.priority >= 2 %}
+          <span class="label priority priority--medium" aria-label="Medium priority">!</span>
+        {% endif %}
         <div class="content">
           <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
         </div>

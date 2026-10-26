@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 Walking skeleton
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Priorities 0 and 1 show no icon
-- [ ] Priorities 2 and 3 show the medium icon
-- [ ] Priorities 4 and 5 show the high icon
-- [ ] Fixture-render tests cover each level
+- [x] Priorities 0 and 1 show no icon
+- [x] Priorities 2 and 3 show the medium icon
+- [x] Priorities 4 and 5 show the high icon
+- [x] Fixture-render tests cover each level
