@@ -1,5 +1,5 @@
 {% comment %}
-  Partials, rendered from full.liquid with {% render 'name', arg: value %}.
+  Partials, rendered from the layout files (full, half_horizontal, half_vertical, quadrant) with {% render 'name', arg: value %}.
   Rendered partials see only the arguments passed to them.
 {% endcomment %}
 {% template due_label %}
@@ -30,18 +30,101 @@
 <div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
 {% endtemplate %}
 
-{% template overflow_footer %}
-{% comment %} Expects hidden_count. {% endcomment %}
-<div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
+{% template overflow_count %}
+{% comment %} Expects hidden_count. Sits in the title bar. {% endcomment %}
+<span class="instance overflow-count">+{{ hidden_count }} more</span>
 {% endtemplate %}
 
 {% template task_row %}
-{% comment %} Expects task, project (may be nil), dated_from, utc_offset, today_day. {% endcomment %}
+{% comment %} Expects task, project (may be nil), grouped, dated_from, utc_offset, today_day. {% endcomment %}
 <div class="item task">
   {% render 'priority_icon', priority: task.priority %}
   <div class="content">
-    <span class="title title--small task-title">{% if project.title %}{{ project.title }} - {% endif %}{{ task.title }}</span>
+    <span class="title title--small task-title">{% if project.title and grouped == false %}{{ project.title }} - {% endif %}{{ task.title }}</span>
     {% render 'due_label', due_date: task.due_date, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
   </div>
+</div>
+{% endtemplate %}
+
+{% template task_rows %}
+{% comment %} Expects tasks (already capped), projects, grouped, dated_from, utc_offset, today_day. Grouped rows get a Project header whenever the Project changes. {% endcomment %}
+{% assign previous_project_id = nil %}
+{% for task in tasks %}
+  {% assign project = projects | where: 'id', task.project_id | first %}
+  {% if grouped and project.title and task.project_id != previous_project_id %}
+    <div class="item group-header"><span class="label label--underline">{{ project.title }}</span></div>
+  {% endif %}
+  {% assign previous_project_id = task.project_id %}
+  {% render 'task_row', task: task, project: project, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
+{% endfor %}
+{% endtemplate %}
+
+{% template task_screen %}
+{% comment %}
+  Expects tasks (open Tasks, first page), projects, utc_offset, row_cap (Tasks shown; headers do not count) and columns (1 or 2, default 1).
+  Layout files pass tasks: IDX_0.data, projects: IDX_1.data, utc_offset: trmnl.user.utc_offset and
+  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, because partials cannot read trmnl.
+  group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
+  Two columns fill the first before the second.
+  Tasks carry only project_id, so the Project name is looked up in projects.
+{% endcomment %}
+{% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
+{% assign dated_from = "1970" %}
+{% assign utc_offset = utc_offset | default: 0 %}
+{% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
+{% assign tasks_first_char = tasks | json | slice: 0 %}
+{% assign projects_first_char = projects | json | slice: 0 %}
+{% assign load_ok = false %}
+{% if tasks_first_char == '[' and projects_first_char == '[' %}{% assign load_ok = true %}{% endif %}
+{% if load_ok %}
+  {% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
+  {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
+  {% assign undated = tasks | where_exp: 't', 't.due_date < dated_from' %}
+  {% assign tasks = dated | concat: undated %}
+{% endif %}
+{% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
+{% assign columns = columns | default: 1 %}
+{% assign grouped = true %}
+{% assign group_setting = group_setting | append: '' | downcase %}
+{% if group_setting == 'false' or group_setting == 'no' or group_setting == '0' or group_setting == 'off' %}{% assign grouped = false %}{% endif %}
+{% assign hidden_count = tasks.size | minus: row_cap %}
+
+{% if load_ok == false or tasks.size == 0 %}
+  <div class="layout layout--col">
+    <div class="list">{% if load_ok %}{% render 'empty_state' %}{% else %}{% render 'error_state' %}{% endif %}</div>
+  </div>
+{% else %}
+  {% assign shown = tasks | slice: 0, row_cap %}
+  {% if grouped %}
+    {% assign project_ids = shown | map: 'project_id' | uniq %}
+    {% assign regrouped = '' | split: ',' %}
+    {% for project_id in project_ids %}
+      {% assign in_project = shown | where: 'project_id', project_id %}
+      {% assign regrouped = regrouped | concat: in_project %}
+    {% endfor %}
+    {% assign shown = regrouped %}
+  {% endif %}
+  {% if columns == 2 %}
+    {% assign first_size = shown.size | plus: 1 | divided_by: 2 %}
+    {% assign left = shown | slice: 0, first_size %}
+    {% assign right = shown | slice: first_size, first_size %}
+  {% else %}
+    {% assign left = shown %}
+  {% endif %}
+  <div class="layout{% if columns == 1 %} layout--col{% endif %}">
+    {% if columns == 2 %}<div class="columns">{% endif %}
+    {% for column_number in (1..columns) %}
+      {% if column_number == 1 %}{% assign chunk = left %}{% else %}{% assign chunk = right %}{% endif %}
+      {% if columns == 2 %}<div class="column">{% endif %}
+      <div class="list">{% render 'task_rows', tasks: chunk, projects: projects, grouped: grouped, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}</div>
+      {% if columns == 2 %}</div>{% endif %}
+    {% endfor %}
+    {% if columns == 2 %}</div>{% endif %}
+  </div>
+{% endif %}
+
+<div class="title_bar">
+  <span class="title">Vikunja Tasks</span>
+  {% if load_ok and hidden_count > 0 %}{% render 'overflow_count', hidden_count: hidden_count %}{% endif %}
 </div>
 {% endtemplate %}

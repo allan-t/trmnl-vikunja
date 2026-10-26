@@ -16,8 +16,18 @@ docker compose run --rm test
 docker run --rm -v "$PWD:/plugin" trmnl/trmnlp lint
 ```
 
-`src/settings.yml` holds the polling config and settings; `src/full.liquid` is the full layout.
+`src/settings.yml` holds the polling config and settings. `src/full.liquid`, `half_horizontal.liquid`, `half_vertical.liquid` and `quadrant.liquid` are the four layouts; they all render the shared `task_screen` partial in `src/shared.liquid`.
 Tests mock the Vikunja API with fixtures in `tests/fixtures/` and a fixed clock (`now:`).
+
+## Layout screenshots
+
+```sh
+bin/screenshots
+```
+
+Renders every layout, grouped and ungrouped, into `docs/screenshots/<layout>-<grouped|ungrouped>.png` from fixture data (`tests/fixtures/screenshot_*.json`) and a fixed clock. It needs only Docker: no Vikunja token, and `.trmnlp.yml` is not touched. Output is deterministic (checked: two runs, and a fresh run against the committed images, are byte-identical), so a diff in the images is a real change. Commit them with layout changes. CI reruns `bin/screenshots` and fails if `git status --porcelain docs/screenshots` shows anything (changed, new or deleted images).
+
+Never commit a `.trmnlp.yml` with resolved values: `docker compose up` rewrites it, so keep the `{{ env.* }}` placeholders.
 
 ## Adding a test
 

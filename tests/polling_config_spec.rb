@@ -41,10 +41,10 @@ RSpec.describe 'Polling config' do
     expect(settings['polling_headers']).to eq('authorization=Bearer {{ api_token }}')
   end
 
-  it 'takes the base URL and API token as settings, the token as a password field' do
+  it 'takes the base URL, API token and grouping as settings, the token as a password field' do
     fields = settings['custom_fields'].reject { |f| f['field_type'] == 'author_bio' }.to_h { |f| [f['keyname'], f] }
 
-    expect(fields.keys).to contain_exactly('base_url', 'api_token')
+    expect(fields.keys).to contain_exactly('base_url', 'api_token', 'group_by_project')
     expect(fields['base_url']['field_type']).to eq('string')
     expect(fields['api_token']['field_type']).to eq('password')
   end
