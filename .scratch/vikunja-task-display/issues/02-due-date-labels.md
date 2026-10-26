@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 Walking skeleton
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Today, Tomorrow and Overdue Nd labels render correctly against a fixed "now"
-- [ ] Far dates render as an absolute date
-- [ ] Tasks with an unset due date show no date line
-- [ ] Fixture-render tests cover each case
+- [x] Today, Tomorrow and Overdue Nd labels render correctly against a fixed "now"
+- [x] Far dates render as an absolute date
+- [x] Tasks with an unset due date show no date line
+- [x] Fixture-render tests cover each case
