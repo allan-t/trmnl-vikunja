@@ -14,6 +14,9 @@ UNSET_DUE_DATE = '0001-01-01T00:00:00Z'
 # Grouping is off so specs read plain "Project - Task" rows; grouping_spec.rb turns it on.
 CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token', group_by_project: false }.freeze
 
+# CUSTOM_FIELDS with the Group by Project setting switched on (or to value).
+def grouped_fields(value = true) = CUSTOM_FIELDS.merge(group_by_project: value)
+
 def fixture_json(name) = JSON.parse(File.read(File.join(__dir__, 'fixtures', "#{name}.json")))
 
 # Mocks for the two polling requests: open Tasks (IDX_0) and Projects (IDX_1).

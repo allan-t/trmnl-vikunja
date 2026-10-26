@@ -7,7 +7,7 @@ LAYOUTS.each do |layout|
 
       expect(screen).to have_text('Home - Buy milk')
       expect(screen).to have_text('Today')
-      expect(screen).to have_css('.priority--high')
+      expect(screen).to have_text('!!')
     end
 
     it 'shows the Vikunja Tasks title bar' do
@@ -15,7 +15,10 @@ LAYOUTS.each do |layout|
     end
 
     it 'shows "No open tasks" when there are no open Tasks' do
-      expect(render_tasks([], layout:)).to have_text('No open tasks')
+      screen = render_tasks([], layout:)
+
+      expect(screen).to have_text('No open tasks')
+      expect(screen).to have_css('.layout.layout--col > .list')
     end
 
     it 'shows the error message when Vikunja rejects the token' do
@@ -23,6 +26,7 @@ LAYOUTS.each do |layout|
 
       expect(screen).to have_text(/Could not load tasks/)
       expect(screen).not_to have_text('No open tasks')
+      expect(screen).to have_css('.layout.layout--col > .list')
     end
   end
 end

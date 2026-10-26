@@ -17,4 +17,6 @@ jobs:
       - run: docker run --rm -v "$PWD:/plugin" trmnl/trmnlp lint
       - run: bin/screenshots
       - name: Fail if committed screenshots are stale
-        run: git diff --exit-code --stat -- docs/screenshots || (echo "Run bin/screenshots and commit docs/screenshots." && exit 1)
+        run: |
+          status="$(git status --porcelain docs/screenshots)"
+          if [ -n "$status" ]; then echo "$status"; echo "Run bin/screenshots and commit docs/screenshots."; exit 1; fi
