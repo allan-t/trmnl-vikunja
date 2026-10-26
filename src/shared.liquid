@@ -1,0 +1,47 @@
+{% comment %}
+  Partials, rendered from full.liquid with {% render 'name', arg: value %}.
+  Rendered partials see only the arguments passed to them.
+{% endcomment %}
+{% template due_label %}
+{% comment %} Expects due_date, dated_from, utc_offset, today_day. Renders nothing for an unset due date. {% endcomment %}
+{% if due_date >= dated_from %}
+  {% assign local_due = due_date | date: '%s' | plus: utc_offset %}
+  {% assign days_until = local_due | divided_by: 86400 | minus: today_day %}
+  <span class="description label task-due">
+    {% if days_until < 0 %}Overdue {{ days_until | abs }}d{% elsif days_until == 0 %}Today{% elsif days_until == 1 %}Tomorrow{% else %}{{ local_due | date: '%-d %b' }}{% endif %}
+  </span>
+{% endif %}
+{% endtemplate %}
+
+{% template priority_icon %}
+{% comment %} Expects priority (0-5). {% endcomment %}
+{% if priority >= 4 %}
+  <span class="label label--inverted priority priority--high" aria-label="High priority">!!</span>
+{% elsif priority >= 2 %}
+  <span class="label priority priority--medium" aria-label="Medium priority">!</span>
+{% endif %}
+{% endtemplate %}
+
+{% template error_state %}
+<div class="item"><div class="content"><span class="title title--small task-error">Could not load tasks. Check the Vikunja URL and API token.</span></div></div>
+{% endtemplate %}
+
+{% template empty_state %}
+<div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
+{% endtemplate %}
+
+{% template overflow_footer %}
+{% comment %} Expects hidden_count. {% endcomment %}
+<div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
+{% endtemplate %}
+
+{% template task_row %}
+{% comment %} Expects task, project (may be nil), dated_from, utc_offset, today_day. {% endcomment %}
+<div class="item task">
+  {% render 'priority_icon', priority: task.priority %}
+  <div class="content">
+    <span class="title title--small task-title">{% if project.title %}{{ project.title }} - {% endif %}{{ task.title }}</span>
+    {% render 'due_label', due_date: task.due_date, dated_from: dated_from, utc_offset: utc_offset, today_day: today_day %}
+  </div>
+</div>
+{% endtemplate %}

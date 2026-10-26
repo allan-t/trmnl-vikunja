@@ -1,0 +1,19 @@
+# IntelliJ / JetBrains
+.idea/*
+!.idea/runConfigurations/
+*.iml
+*.iws
+*.ipr
+out/
+
+# trmnlp build output
+_build/
+
+# trmnlp test --report output
+report/
+
+# Local secrets for docker compose preview
+.env
+
+# Local markdown issue tracker (kept local until moving to GitHub issues)
+.scratch/
