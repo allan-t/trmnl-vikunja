@@ -1,3 +1,7 @@
+## Testing
+
+No Ruby or npm on the host. Run tests, lint and preview through Docker: see `README.md` "Local preview and testing".
+
 ## Agent skills
 
 ### Issue tracker

@@ -9,3 +9,10 @@ services:
     environment:
       VIKUNJA_BASE_URL: ${VIKUNJA_BASE_URL:-https://app.vikunja.cloud}
       VIKUNJA_API_TOKEN: ${VIKUNJA_API_TOKEN:-}
+
+  test:
+    image: trmnl/trmnlp
+    command: test
+    profiles: [test]
+    volumes:
+      - .:/plugin
