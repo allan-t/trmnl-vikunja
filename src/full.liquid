@@ -4,17 +4,25 @@
 {% endcomment %}
 {% assign tasks = IDX_0.data %}
 {% assign projects = IDX_1.data %}
+{% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
+{% assign tasks_json = tasks | json %}
+{% assign tasks_first_char = tasks_json | slice: 0 %}
 
 <div class="layout layout--col">
   <div class="list">
-    {% for task in tasks %}
+    {% if tasks_first_char != '[' %}
+      <div class="item"><div class="content"><span class="title title--small task-error">Could not load tasks. Check the Vikunja URL and API token.</span></div></div>
+    {% elsif tasks.size == 0 %}
+      <div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
+    {% endif %}
+    {% if tasks_first_char == '[' %}{% for task in tasks %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
         <div class="content">
           <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
         </div>
       </div>
-    {% endfor %}
+    {% endfor %}{% endif %}
   </div>
 </div>
 
