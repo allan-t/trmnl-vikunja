@@ -2,29 +2,34 @@
   IDX_0.data = open Tasks (first page), IDX_1.data = Projects.
   Tasks carry only project_id, so the Project name is looked up in IDX_1.
 {% endcomment %}
-{% assign projects = IDX_1.data %}
 {% assign row_cap = 8 %}
+{% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
+{% assign dated_from = "1970" %}
+{% assign utc_offset = trmnl.user.utc_offset | default: 0 %}
 {% assign tasks = IDX_0.data %}
+{% assign projects = IDX_1.data %}
 {% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
-{% assign tasks_json = tasks | json %}
-{% assign tasks_first_char = tasks_json | slice: 0 %}
-{% if tasks_first_char == '[' %}
+{% assign tasks_first_char = tasks | json | slice: 0 %}
+{% assign projects_first_char = projects | json | slice: 0 %}
+{% assign load_ok = false %}
+{% if tasks_first_char == '[' and projects_first_char == '[' %}{% assign load_ok = true %}{% endif %}
+{% if load_ok %}
   {% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
-  {% assign dated = tasks | where_exp: 't', 't.due_date != "0001-01-01T00:00:00Z"' %}
-  {% assign undated = tasks | where_exp: 't', 't.due_date == "0001-01-01T00:00:00Z"' %}
+  {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
+  {% assign undated = tasks | where_exp: 't', 't.due_date < dated_from' %}
   {% assign tasks = dated | concat: undated %}
 {% endif %}
-{% assign today_day = 'now' | date: '%s' | divided_by: 86400 %}
+{% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
 {% assign hidden_count = tasks.size | minus: row_cap %}
 
 <div class="layout layout--col">
   <div class="list">
-    {% if tasks_first_char != '[' %}
+    {% if load_ok == false %}
       <div class="item"><div class="content"><span class="title title--small task-error">Could not load tasks. Check the Vikunja URL and API token.</span></div></div>
     {% elsif tasks.size == 0 %}
       <div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
     {% endif %}
-    {% if tasks_first_char == '[' %}{% for task in tasks limit: row_cap %}
+    {% if load_ok %}{% for task in tasks limit: row_cap %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
         {% if task.priority >= 4 %}
@@ -33,17 +38,18 @@
           <span class="label priority priority--medium" aria-label="Medium priority">!</span>
         {% endif %}
         <div class="content">
-          <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
-          {% if task.due_date != "0001-01-01T00:00:00Z" %}
-            {% assign days_until = task.due_date | date: '%s' | divided_by: 86400 | minus: today_day %}
+          <span class="title title--small task-title">{% if project.title %}{{ project.title }} - {% endif %}{{ task.title }}</span>
+          {% if task.due_date >= dated_from %}
+            {% assign local_due = task.due_date | date: '%s' | plus: utc_offset %}
+            {% assign days_until = local_due | divided_by: 86400 | minus: today_day %}
             <span class="description label task-due">
-              {% if days_until < 0 %}Overdue {{ days_until | abs }}d{% elsif days_until == 0 %}Today{% elsif days_until == 1 %}Tomorrow{% else %}{{ task.due_date | date: '%-d %b' }}{% endif %}
+              {% if days_until < 0 %}Overdue {{ days_until | abs }}d{% elsif days_until == 0 %}Today{% elsif days_until == 1 %}Tomorrow{% else %}{{ local_due | date: '%-d %b' }}{% endif %}
             </span>
           {% endif %}
         </div>
       </div>
     {% endfor %}{% endif %}
-    {% if tasks_first_char == '[' and hidden_count > 0 %}
+    {% if load_ok and hidden_count > 0 %}
       <div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
     {% endif %}
   </div>

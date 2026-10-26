@@ -2,37 +2,36 @@
 
 # Seam 1: the full layout rendered from a fixture Vikunja response and a fixed "now".
 RSpec.describe 'Full layout' do
-  let(:custom_fields) { { base_url: BASE_URL, api_token: 'secret-token' } }
-
-  def render(mocks: vikunja_mocks) = trmnl.render(now: FIXED_NOW, custom_fields:, mocks:)
-
   it 'shows each open Task as "Project - Task" in request order' do
-    screen = render
+    expect(render_screen).to have_text(/Admin - Renew passport.*Home - Buy milk.*Work - Write report/m)
+  end
 
-    expect(screen).to have_text(/Admin - Renew passport.*Home - Buy milk.*Work - Write report/m)
+  it 'shows just the Task title when its Project cannot be resolved' do
+    screen = render_tasks([build_task(1, title: 'Orphan', project_id: 999)])
+
+    expect(screen).to have_text('Orphan')
+    expect(screen).not_to have_text(/- Orphan/)
   end
 
   describe 'Priority icons' do
-    def task(priority) = { 'id' => 900 + priority, 'title' => "Prio#{priority}", 'project_id' => 1, 'priority' => priority }
+    def screen_for(priority) = render_tasks([build_task(priority, title: "Prio#{priority}", priority:)])
 
     it 'shows no icon for priorities 0 and 1' do
-      [0, 1].each { |p| expect(render(mocks: vikunja_mocks(tasks: [task(p)]))).not_to have_text(/!|▲/) }
+      [0, 1].each { |p| expect(screen_for(p)).not_to have_text(/!|▲/) }
     end
 
     it 'shows the medium icon for priorities 2 and 3' do
-      [2, 3].each { |p| expect(render(mocks: vikunja_mocks(tasks: [task(p)]))).to have_text(/(?<!!)!(?!!).*Prio#{p}/m) }
+      [2, 3].each { |p| expect(screen_for(p)).to have_text(/(?<!!)!(?!!).*Prio#{p}/m) }
     end
 
     it 'shows the high icon for priorities 4 and 5' do
-      [4, 5].each { |p| expect(render(mocks: vikunja_mocks(tasks: [task(p)]))).to have_text(/!!.*Prio#{p}/m) }
+      [4, 5].each { |p| expect(screen_for(p)).to have_text(/!!.*Prio#{p}/m) }
     end
   end
 
-
-  def task(id, due, title: "T#{id}") = { id:, title:, project_id: 10, done: false, priority: 0, due_date: due }
-  def labels_for(due) = render(mocks: vikunja_mocks(tasks: [task(1, due)]))
-
   describe 'due date labels' do
+    def labels_for(due, **) = render_tasks([build_task(1, due_date: due)], **)
+
     it('says Today for a due date later today') { expect(labels_for('2030-01-01T18:00:00Z')).to have_text('Today') }
     it('says Tomorrow for the next day') { expect(labels_for('2030-01-02T09:00:00Z')).to have_text('Tomorrow') }
     it('says Overdue 1d for yesterday') { expect(labels_for('2029-12-31T09:00:00Z')).to have_text('Overdue 1d') }
@@ -40,37 +39,64 @@ RSpec.describe 'Full layout' do
     it('shows an absolute date for far dates') { expect(labels_for('2030-11-12T09:00:00Z')).to have_text('12 Nov') }
 
     it 'shows no date line for an unset due date' do
-      screen = labels_for('0001-01-01T00:00:00Z')
+      expect(labels_for(UNSET_DUE_DATE)).not_to have_text(/Today|Tomorrow|Overdue|Jan/)
+    end
 
-      expect(screen).not_to have_text(/Today|Tomorrow|Overdue|Jan/)
+    it 'treats any pre-1970 due date as unset' do
+      expect(labels_for('0000-12-30T00:00:00Z')).not_to have_text(/Today|Tomorrow|Overdue|Jan|Dec/)
+    end
+
+    describe "in the user's time zone" do
+      def offset(seconds) = { trmnl: { user: { utc_offset: seconds } } }
+
+      it 'says Tomorrow when the due date is already the next day locally (east of UTC)' do
+        expect(labels_for('2030-01-01T20:00:00Z', variables: offset(10 * 3600))).to have_text('Tomorrow')
+      end
+
+      it 'says Today when the due date is still the same day locally (west of UTC)' do
+        expect(labels_for('2030-01-01T05:00:00Z', variables: offset(-9 * 3600))).to have_text('Today')
+      end
+
+      it 'shows the absolute date in local time' do
+        expect(labels_for('2030-11-12T23:00:00Z', variables: offset(10 * 3600))).to have_text('13 Nov')
+      end
+
+      it 'falls back to UTC when the offset is not available' do
+        expect(labels_for('2030-01-01T20:00:00Z', variables: { trmnl: { user: { utc_offset: nil } } }))
+          .to have_text('Today')
+      end
     end
   end
 
   it 'lists undated Tasks last, keeping the given order otherwise' do
-    tasks = [task(1, '0001-01-01T00:00:00Z', title: 'Undated A'), task(2, '2030-01-05T09:00:00Z', title: 'Dated B'),
-             task(3, '0001-01-01T00:00:00Z', title: 'Undated C'), task(4, '2030-01-06T09:00:00Z', title: 'Dated D')]
+    tasks = [build_task(1, title: 'Undated A'), build_task(2, title: 'Dated B', due_date: '2030-01-05T09:00:00Z'),
+             build_task(3, title: 'Undated C'), build_task(4, title: 'Dated D', due_date: '2030-01-06T09:00:00Z')]
 
-    expect(render(mocks: vikunja_mocks(tasks:))).to have_text(/Dated B.*Dated D.*Undated A.*Undated C/m)
+    expect(render_tasks(tasks)).to have_text(/Dated B.*Dated D.*Undated A.*Undated C/m)
   end
 
   it 'shows "No open tasks" when there are no open Tasks' do
-    expect(render(mocks: vikunja_mocks(tasks: []))).to have_text('No open tasks')
+    expect(render_tasks([])).to have_text('No open tasks')
   end
 
   it 'shows an error message when Vikunja rejects the token' do
-    mocks = {
-      "#{BASE_URL}/api/v1/tasks" => { status: 401, json: { code: 1011, message: 'invalid token' } },
-      "#{BASE_URL}/api/v1/projects" => { status: 401, json: { code: 1011, message: 'invalid token' } }
-    }
-    screen = render(mocks:)
+    screen = render_screen(mocks: failing_mocks)
 
     expect(screen).to have_text(/Could not load tasks/)
     expect(screen).not_to have_text('No open tasks')
     expect(screen).not_to have_text('secret-token')
   end
 
+  it 'shows an error message when only the Projects request fails' do
+    mocks = vikunja_mocks.merge("#{BASE_URL}/api/v1/projects" => failing_mocks["#{BASE_URL}/api/v1/projects"])
+    screen = render_screen(mocks:)
+
+    expect(screen).to have_text(/Could not load tasks/)
+    expect(screen).not_to have_text('Buy milk')
+  end
+
   it 'shows an error message when Vikunja is down' do
-    screen = render(mocks: { '*' => { status: 500, body: '' } })
+    screen = render_screen(mocks: { '*' => { status: 500, body: '' } })
 
     expect(screen).to have_text(/Could not load tasks/)
     expect(screen).not_to have_text('No open tasks')
@@ -78,12 +104,8 @@ RSpec.describe 'Full layout' do
 end
 
 RSpec.describe 'Full layout row cap' do
-  let(:custom_fields) { { base_url: BASE_URL, api_token: 'secret-token' } }
-
-  def tasks_of(count) = (1..count).map { |i| { 'id' => i, 'title' => format('Chore %02d', i), 'project_id' => 10 } }
-
   def render_count(count)
-    trmnl.render(now: FIXED_NOW, custom_fields:, mocks: vikunja_mocks(tasks: tasks_of(count)))
+    render_tasks((1..count).map { |i| build_task(i, title: format('Chore %02d', i)) })
   end
 
   it 'shows no footer when Tasks are under the cap' do
@@ -93,18 +115,18 @@ RSpec.describe 'Full layout row cap' do
     expect(screen).not_to have_text(/more/)
   end
 
-  it 'shows all 8 Tasks and no footer when exactly at the cap' do
-    screen = render_count(8)
+  it 'shows all Tasks and no footer when exactly at the cap' do
+    screen = render_count(ROW_CAP)
 
-    expect(screen).to have_text('Chore 08')
+    expect(screen).to have_text(format('Chore %02d', ROW_CAP))
     expect(screen).not_to have_text(/more/)
   end
 
-  it 'caps rows at 8 and shows "+N more" with the hidden count when over' do
-    screen = render_count(11)
+  it 'caps rows and shows "+N more" with the hidden count when over' do
+    screen = render_count(ROW_CAP + 3)
 
-    expect(screen).to have_text('Chore 08')
-    expect(screen).not_to have_text('Chore 09')
+    expect(screen).to have_text(format('Chore %02d', ROW_CAP))
+    expect(screen).not_to have_text(format('Chore %02d', ROW_CAP + 1))
     expect(screen).to have_text('+3 more')
   end
 end

@@ -20,7 +20,7 @@ RSpec.describe 'Polling config' do
   end
 
   it 'builds both URLs from the base URL setting' do
-    expect(urls).to eq(['{{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by[]=due_date&sort_by[]=priority&order_by[]=asc&order_by[]=desc',
+    expect(urls).to eq(['{{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc',
                         '{{ base_url }}/api/v1/projects'])
   end
 
@@ -29,8 +29,8 @@ RSpec.describe 'Polling config' do
   end
 
   it 'sorts by due date ascending then Priority descending' do
-    expect(tasks_query.select { |k, _| k == 'sort_by[]' }.map(&:last)).to eq(%w[due_date priority])
-    expect(tasks_query.select { |k, _| k == 'order_by[]' }.map(&:last)).to eq(%w[asc desc])
+    expect(tasks_query.select { |k, _| k == 'sort_by' }.map(&:last)).to eq(%w[due_date priority])
+    expect(tasks_query.select { |k, _| k == 'order_by' }.map(&:last)).to eq(%w[asc desc])
   end
 
   it 'asks for the first page only' do
