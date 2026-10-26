@@ -3,6 +3,7 @@
   Tasks carry only project_id, so the Project name is looked up in IDX_1.
 {% endcomment %}
 {% assign projects = IDX_1.data %}
+{% assign row_cap = 8 %}
 {% assign tasks = IDX_0.data %}
 {% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
 {% assign tasks_json = tasks | json %}
@@ -14,6 +15,7 @@
   {% assign tasks = dated | concat: undated %}
 {% endif %}
 {% assign today_day = 'now' | date: '%s' | divided_by: 86400 %}
+{% assign hidden_count = tasks.size | minus: row_cap %}
 
 <div class="layout layout--col">
   <div class="list">
@@ -22,7 +24,7 @@
     {% elsif tasks.size == 0 %}
       <div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
     {% endif %}
-    {% if tasks_first_char == '[' %}{% for task in tasks %}
+    {% if tasks_first_char == '[' %}{% for task in tasks limit: row_cap %}
       {% assign project = projects | where: 'id', task.project_id | first %}
       <div class="item task">
         {% if task.priority >= 4 %}
@@ -41,6 +43,9 @@
         </div>
       </div>
     {% endfor %}{% endif %}
+    {% if tasks_first_char == '[' and hidden_count > 0 %}
+      <div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
+    {% endif %}
   </div>
 </div>
 
