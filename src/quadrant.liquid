@@ -1,3 +1,3 @@
 {% comment %} IDX_0.data = open Tasks (first page), IDX_1.data = Projects. {% endcomment %}
 {% assign group = true %}{% assign group_setting = trmnl.plugin_settings.custom_fields_values.group_by_project | append: '' %}{% if group_setting == 'false' or group_setting == 'no' %}{% assign group = false %}{% endif %}
-{% render 'task_screen', tasks: IDX_0.data, projects: IDX_1.data, utc_offset: trmnl.user.utc_offset, grouped: group %}
+{% render 'task_screen', tasks: IDX_0.data, projects: IDX_1.data, utc_offset: trmnl.user.utc_offset, grouped: group, row_cap: 2 %}

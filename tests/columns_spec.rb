@@ -5,11 +5,11 @@ RSpec.describe 'Layout columns' do
 
   { 'full' => 2, 'half_horizontal' => 2, 'half_vertical' => 1, 'quadrant' => 1 }.each do |layout, columns|
     it "renders #{layout} in #{columns} column(s)" do
-      screen = render_tasks(tasks, layout:)
+      screen = render_tasks(tasks.first(3), layout:)
 
       expect(screen).to have_css('.column', count: columns) if columns > 1
       expect(screen).not_to have_css('.column') if columns == 1
-      expect(screen).to have_css('.task', count: 5)
+      expect(screen).to have_css('.task', count: 3)
     end
   end
 

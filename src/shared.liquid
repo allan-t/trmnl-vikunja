@@ -31,8 +31,8 @@
 {% endtemplate %}
 
 {% template overflow_footer %}
-{% comment %} Expects hidden_count. {% endcomment %}
-<div class="item overflow-footer"><span class="label label--small">+{{ hidden_count }} more</span></div>
+{% comment %} Expects hidden_count. Sits in the title bar. {% endcomment %}
+<span class="instance overflow-footer">+{{ hidden_count }} more</span>
 {% endtemplate %}
 
 {% template task_row %}
@@ -61,12 +61,11 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks (open Tasks, first page), projects, utc_offset and columns (1 or 2, default 1).
+  Expects tasks (open Tasks, first page), projects, utc_offset, row_cap (Tasks shown; headers do not count) and columns (1 or 2, default 1).
   grouped (default true) lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second.
   Tasks carry only project_id, so the Project name is looked up in projects.
 {% endcomment %}
-{% assign row_cap = 8 %}
 {% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
 {% assign dated_from = "1970" %}
 {% assign utc_offset = utc_offset | default: 0 %}
@@ -115,11 +114,9 @@
     {% endif %}
   {% endif %}
 </div>
-{% if load_ok and hidden_count > 0 %}
-  {% render 'overflow_footer', hidden_count: hidden_count %}
-{% endif %}
 
 <div class="title_bar">
   <span class="title">Vikunja Tasks</span>
+  {% if load_ok and hidden_count > 0 %}{% render 'overflow_footer', hidden_count: hidden_count %}{% endif %}
 </div>
 {% endtemplate %}

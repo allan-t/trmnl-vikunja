@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "title": "Home"
+    "title": "Admin"
   },
   {
     "id": 2,
@@ -9,10 +9,42 @@
   },
   {
     "id": 3,
-    "title": "Admin"
+    "title": "Home"
   },
   {
     "id": 4,
     "title": "Garden"
+  },
+  {
+    "id": 5,
+    "title": "Health"
+  },
+  {
+    "id": 6,
+    "title": "Travel"
+  },
+  {
+    "id": 7,
+    "title": "Money"
+  },
+  {
+    "id": 8,
+    "title": "Pets"
+  },
+  {
+    "id": 9,
+    "title": "Car"
+  },
+  {
+    "id": 10,
+    "title": "Study"
+  },
+  {
+    "id": 11,
+    "title": "Gifts"
+  },
+  {
+    "id": 12,
+    "title": "Club"
   }
 ]

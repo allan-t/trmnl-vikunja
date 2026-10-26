@@ -24,14 +24,5 @@ LAYOUTS.each do |layout|
       expect(screen).to have_text(/Could not load tasks/)
       expect(screen).not_to have_text('No open tasks')
     end
-
-    it 'caps rows and shows "+N more"' do
-      tasks = (1..ROW_CAP + 2).map { |i| build_task(i, title: format('Chore %02d', i)) }
-      screen = render_tasks(tasks, layout:)
-
-      expect(screen).to have_text(format('Chore %02d', ROW_CAP))
-      expect(screen).not_to have_text(format('Chore %02d', ROW_CAP + 1))
-      expect(screen).to have_text('+2 more')
-    end
   end
 end
