@@ -1,0 +1,23 @@
+{% comment %}
+  IDX_0.data = open Tasks (first page), IDX_1.data = Projects.
+  Tasks carry only project_id, so the Project name is looked up in IDX_1.
+{% endcomment %}
+{% assign tasks = IDX_0.data %}
+{% assign projects = IDX_1.data %}
+
+<div class="layout layout--col">
+  <div class="list">
+    {% for task in tasks %}
+      {% assign project = projects | where: 'id', task.project_id | first %}
+      <div class="item task">
+        <div class="content">
+          <span class="title title--small task-title">{{ project.title }} - {{ task.title }}</span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="title_bar">
+  <span class="title">Vikunja Tasks</span>
+</div>

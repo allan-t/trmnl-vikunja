@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Recipe previews locally with `trmnlp` and is importable into TRMNL
-- [ ] Base URL and API token are settings, not hardcoded; token is sent as a Bearer header
-- [ ] Polling requests only open Tasks, sorted by due date ascending then Priority descending, first page only, every 15 minutes
-- [ ] Project names are resolved from a second polling request
-- [ ] Full layout renders each Task as "Project - Task" in request order
-- [ ] Fixture-render test and static polling-config test both pass
+- [x] Recipe previews locally with `trmnlp` and is importable into TRMNL
+- [x] Base URL and API token are settings, not hardcoded; token is sent as a Bearer header
+- [x] Polling requests only open Tasks, sorted by due date ascending then Priority descending, first page only, every 15 minutes
+- [x] Project names are resolved from a second polling request
+- [x] Full layout renders each Task as "Project - Task" in request order
+- [x] Fixture-render test and static polling-config test both pass
