@@ -27,7 +27,8 @@
 {% endtemplate %}
 
 {% template empty_state %}
-<div class="item"><div class="content"><span class="title title--small task-empty">No open tasks</span></div></div>
+{% comment %} Expects filtering_projects (true when a Project filter is set). {% endcomment %}
+<div class="item"><div class="content"><span class="title title--small task-empty">{% if filtering_projects %}No open tasks in the selected Projects{% else %}No open tasks{% endif %}</span></div></div>
 {% endtemplate %}
 
 {% template overflow_count %}
@@ -61,9 +62,9 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks (open Tasks, first page), projects, utc_offset, row_cap (Tasks shown; headers do not count) and columns (1 or 2, default 1).
+  Expects tasks (open Tasks, first page), projects, utc_offset, project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively), row_cap (Tasks shown; headers do not count) and columns (1 or 2, default 1).
   Layout files pass tasks: IDX_0.data, projects: IDX_1.data, utc_offset: trmnl.user.utc_offset and
-  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, because partials cannot read trmnl.
+  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, because partials cannot read trmnl.
   group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second.
   Tasks carry only project_id, so the Project name is looked up in projects.
@@ -81,6 +82,28 @@
   {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
   {% assign undated = tasks | where_exp: 't', 't.due_date < dated_from' %}
   {% assign tasks = dated | concat: undated %}
+  {% assign wanted_names = project_filter | append: '' | downcase | split: ',' %}
+  {% assign wanted_clean = '' | split: ',' %}
+  {% for wanted_name in wanted_names %}
+    {% assign trimmed_name = wanted_name | strip %}
+    {% if trimmed_name != '' %}
+      {% assign one_name = trimmed_name | split: '|||' %}
+      {% assign wanted_clean = wanted_clean | concat: one_name %}
+    {% endif %}
+  {% endfor %}
+  {% if wanted_clean.size > 0 %}
+    {% assign filtering_projects = true %}
+    {% assign kept_projects = '' | split: ',' %}
+    {% for candidate in projects %}
+      {% assign lower_title = candidate.title | downcase | strip %}
+      {% if wanted_clean contains lower_title %}
+        {% assign one_project = projects | where: 'id', candidate.id %}
+        {% assign kept_projects = kept_projects | concat: one_project %}
+      {% endif %}
+    {% endfor %}
+    {% assign wanted_ids = kept_projects | map: 'id' %}
+    {% assign tasks = tasks | where_exp: 't', 'wanted_ids contains t.project_id' %}
+  {% endif %}
 {% endif %}
 {% assign today_day = 'now' | date: '%s' | plus: utc_offset | divided_by: 86400 %}
 {% assign columns = columns | default: 1 %}
@@ -91,7 +114,7 @@
 
 {% if load_ok == false or tasks.size == 0 %}
   <div class="layout layout--col">
-    <div class="list">{% if load_ok %}{% render 'empty_state' %}{% else %}{% render 'error_state' %}{% endif %}</div>
+    <div class="list">{% if load_ok %}{% render 'empty_state', filtering_projects: filtering_projects %}{% else %}{% render 'error_state' %}{% endif %}</div>
   </div>
 {% else %}
   {% assign shown = tasks | slice: 0, row_cap %}

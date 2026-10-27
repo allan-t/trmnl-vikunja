@@ -6,7 +6,8 @@ static_data: ''
 polling_verb: get
 framework_version: latest
 polling_url: |-
-  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
+  {%- if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif -%}
+  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/tasks?per_page=50&filter=done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }})&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
   {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/projects
 polling_headers: authorization=Bearer {{ api_token }}
 id: 520678
@@ -25,6 +26,26 @@ custom_fields:
     field_type: password
     name: Vikunja API token
     description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
+  - keyname: project_names
+    field_type: multi_string
+    optional: true
+    name: Projects to show
+    description: Only Tasks from these Projects are shown. Enter Project names, separated by commas. Leave empty to show all Projects.
+    placeholder: Home, Work
+  - keyname: priority_levels
+    field_type: select
+    multiple: true
+    optional: true
+    name: Priority levels to show
+    description: Only Tasks with these Priorities are shown. Leave empty to show all.
+    help_text: Use <kbd>⌘</kbd>+<kbd>click</kbd> or <kbd>ctrl</kbd>+<kbd>click</kbd> to select and deselect multiple options.
+    options:
+      - Unset: 0
+      - Low: 1
+      - Medium: 2
+      - High: 3
+      - Urgent: 4
+      - Do now: 5
   - keyname: group_by_project
     field_type: boolean
     name: Group by Project
