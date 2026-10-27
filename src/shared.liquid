@@ -116,14 +116,13 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, task_source_mode (custom_filter = the user's own filter already selected the Tasks, so project_filter is ignored), custom_filter (the typed filter; blank in custom mode shows a prompt, never unfiltered Tasks), project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
+  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, task_source_mode (custom_filter = the user's own filter already selected the Tasks, so project_filter is ignored), custom_filter (the typed filter; blank in custom mode shows a prompt, never unfiltered Tasks), project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively), task_sort_field/task_sort_direction (Task ordering) and project_sort_field/project_sort_direction (Project header ordering in grouped mode), plus columns (1 or 2, default 1: how many columns the Tasks flow through).
   Layout files pass tasks_page: IDX_0, projects_page: IDX_1, utc_offset: trmnl.user.utc_offset and
-  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, custom_filter: trmnl.plugin_settings.custom_fields_values.custom_filter, because partials cannot read trmnl.
-  group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
+  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, custom_filter: trmnl.plugin_settings.custom_fields_values.custom_filter, task_sort_field: trmnl.plugin_settings.custom_fields_values.task_sort_field, task_sort_direction: trmnl.plugin_settings.custom_fields_values.task_sort_direction, project_sort_field: trmnl.plugin_settings.custom_fields_values.project_sort_field, project_sort_direction: trmnl.plugin_settings.custom_fields_values.project_sort_direction, because partials cannot read trmnl.
+  group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers.
   Two columns fill the first before the second. Every Task is rendered; fit_script hides the ones that do not fit.
   Tasks carry only project_id, so the Project name is looked up in projects.
 {% endcomment %}
-{% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
 {% assign dated_from = "1970" %}
 {% assign empty_list = '' | split: ',' %}
 {% assign utc_offset = utc_offset | default: 0 %}
@@ -132,11 +131,9 @@
 {% if tasks_page.page != nil and projects_page.page != nil %}{% assign load_ok = true %}{% endif %}
 {% assign tasks = tasks_page.items | default: empty_list %}
 {% assign projects = projects_page.items | default: empty_list %}
+{% assign filtering_projects = false %}
+{% assign filter_projects_ordered = '' | split: ',' %}
 {% if load_ok %}
-  {% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
-  {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
-  {% assign undated = tasks | where_exp: 't', 't.due_date == nil or t.due_date < dated_from' %}
-  {% assign tasks = dated | concat: undated %}
   {% assign wanted_names = project_filter | append: '' | downcase | split: ',' %}
   {% assign wanted_clean = '' | split: ',' %}
   {% for wanted_name in wanted_names %}
@@ -146,17 +143,21 @@
       {% assign wanted_clean = wanted_clean | concat: one_name %}
     {% endif %}
   {% endfor %}
-  {% if wanted_clean.size > 0 and task_source_mode != 'custom_filter' %}
-    {% assign filtering_projects = true %}
-    {% assign kept_projects = '' | split: ',' %}
+  {% for wanted_name in wanted_clean %}
     {% for candidate in projects %}
       {% assign lower_title = candidate.title | downcase | strip %}
-      {% if wanted_clean contains lower_title %}
-        {% assign one_project = projects | where: 'id', candidate.id %}
-        {% assign kept_projects = kept_projects | concat: one_project %}
+      {% if lower_title == wanted_name %}
+        {% assign existing_ids = filter_projects_ordered | map: 'id' %}
+        {% unless existing_ids contains candidate.id %}
+          {% assign one_project = projects | where: 'id', candidate.id %}
+          {% assign filter_projects_ordered = filter_projects_ordered | concat: one_project %}
+        {% endunless %}
       {% endif %}
     {% endfor %}
-    {% assign wanted_ids = kept_projects | map: 'id' %}
+  {% endfor %}
+  {% if wanted_clean.size > 0 and task_source_mode != 'custom_filter' %}
+    {% assign filtering_projects = true %}
+    {% assign wanted_ids = filter_projects_ordered | map: 'id' %}
     {% assign tasks = tasks | where_exp: 't', 'wanted_ids contains t.project_id' %}
   {% endif %}
 {% endif %}
@@ -165,6 +166,16 @@
 {% assign grouped = true %}
 {% assign group_setting = group_setting | append: '' | downcase %}
 {% if group_setting == 'false' or group_setting == 'no' or group_setting == '0' or group_setting == 'off' %}{% assign grouped = false %}{% endif %}
+{% assign task_sort_field = task_sort_field | append: '' | downcase | strip %}
+{% if task_sort_field == '' %}{% assign task_sort_field = 'due_date' %}{% endif %}
+{% assign task_sort_desc = false %}
+{% assign task_sort_direction = task_sort_direction | append: '' | downcase | strip %}
+{% if task_sort_direction == 'desc' or task_sort_direction == 'descending' %}{% assign task_sort_desc = true %}{% endif %}
+{% assign project_sort_field = project_sort_field | append: '' | downcase | strip %}
+{% if project_sort_field == '' %}{% assign project_sort_field = 'unsorted' %}{% endif %}
+{% assign project_sort_desc = false %}
+{% assign project_sort_direction = project_sort_direction | append: '' | downcase | strip %}
+{% if project_sort_direction == 'desc' or project_sort_direction == 'descending' %}{% assign project_sort_desc = true %}{% endif %}
 
 {% assign custom_mode = false %}
 {% if task_source_mode == 'custom_filter' %}{% assign custom_mode = true %}{% endif %}
@@ -186,11 +197,109 @@
   </div>
 {% else %}
   {% assign shown = tasks %}
-  {% if grouped %}
+  {% if grouped == false %}
+    {% if task_sort_field == 'due_date' %}
+      {% assign dated = shown | where_exp: 't', 't.due_date >= dated_from' %}
+      {% assign undated = shown | where_exp: 't', 't.due_date == nil or t.due_date < dated_from' %}
+      {% assign shown = dated | sort: 'due_date' %}
+      {% if task_sort_desc %}{% assign shown = shown | reverse %}{% endif %}
+      {% assign shown = shown | concat: undated %}
+    {% elsif task_sort_field == 'priority' %}
+      {% assign shown = shown | sort: 'priority' %}
+      {% if task_sort_desc %}{% assign shown = shown | reverse %}{% endif %}
+    {% elsif task_sort_field == 'alphabetical' %}
+      {% assign shown = shown | sort: 'title' %}
+      {% if task_sort_desc %}{% assign shown = shown | reverse %}{% endif %}
+    {% elsif task_sort_field == 'project' %}
+      {% assign project_ids = shown | map: 'project_id' | uniq %}
+      {% assign ordered_project_ids = '' | split: ',' %}
+      {% assign sorted_projects = projects | sort: 'title' %}
+      {% if task_sort_desc %}{% assign sorted_projects = sorted_projects | reverse %}{% endif %}
+      {% for project in sorted_projects %}
+        {% if project_ids contains project.id %}
+          {% assign one_id = projects | where: 'id', project.id | map: 'id' %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endif %}
+      {% endfor %}
+      {% for project_id in project_ids %}
+        {% unless ordered_project_ids contains project_id %}
+          {% assign one_id = shown | where: 'project_id', project_id | map: 'project_id' | uniq %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endunless %}
+      {% endfor %}
+      {% assign regrouped = '' | split: ',' %}
+      {% for project_id in ordered_project_ids %}
+        {% assign project_id_num = project_id | plus: 0 %}
+        {% assign in_project = shown | where: 'project_id', project_id_num | sort: 'title' %}
+        {% if task_sort_desc %}{% assign in_project = in_project | reverse %}{% endif %}
+        {% assign regrouped = regrouped | concat: in_project %}
+      {% endfor %}
+      {% assign shown = regrouped %}
+    {% endif %}
+  {% else %}
     {% assign project_ids = shown | map: 'project_id' | uniq %}
+    {% if project_sort_field == 'alphabetical' %}
+      {% assign ordered_project_ids = '' | split: ',' %}
+      {% assign sorted_projects = projects | sort: 'title' %}
+      {% if project_sort_desc %}{% assign sorted_projects = sorted_projects | reverse %}{% endif %}
+      {% for project in sorted_projects %}
+        {% if project_ids contains project.id %}
+          {% assign one_id = projects | where: 'id', project.id | map: 'id' %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endif %}
+      {% endfor %}
+      {% for project_id in project_ids %}
+        {% unless ordered_project_ids contains project_id %}
+          {% assign one_id = shown | where: 'project_id', project_id | map: 'project_id' | uniq %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endunless %}
+      {% endfor %}
+      {% assign project_ids = ordered_project_ids %}
+    {% elsif project_sort_field == 'project_filter_order' %}
+      {% assign ordered_project_ids = '' | split: ',' %}
+      {% assign filter_ids = filter_projects_ordered | map: 'id' %}
+      {% if project_sort_desc %}{% assign filter_ids = filter_ids | reverse %}{% endif %}
+      {% for project_id in filter_ids %}
+        {% if project_ids contains project_id %}
+          {% assign one_id = shown | where: 'project_id', project_id | map: 'project_id' | uniq %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endif %}
+      {% endfor %}
+      {% assign fallback_projects = projects | sort: 'title' %}
+      {% if project_sort_desc %}{% assign fallback_projects = fallback_projects | reverse %}{% endif %}
+      {% for project in fallback_projects %}
+        {% if project_ids contains project.id %}
+          {% unless ordered_project_ids contains project.id %}
+            {% assign one_id = projects | where: 'id', project.id | map: 'id' %}
+            {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+          {% endunless %}
+        {% endif %}
+      {% endfor %}
+      {% for project_id in project_ids %}
+        {% unless ordered_project_ids contains project_id %}
+          {% assign one_id = shown | where: 'project_id', project_id | map: 'project_id' | uniq %}
+          {% assign ordered_project_ids = ordered_project_ids | concat: one_id %}
+        {% endunless %}
+      {% endfor %}
+      {% assign project_ids = ordered_project_ids %}
+    {% endif %}
     {% assign regrouped = '' | split: ',' %}
     {% for project_id in project_ids %}
-      {% assign in_project = shown | where: 'project_id', project_id %}
+      {% assign project_id_num = project_id | plus: 0 %}
+      {% assign in_project = shown | where: 'project_id', project_id_num %}
+      {% if task_sort_field == 'due_date' %}
+        {% assign dated = in_project | where_exp: 't', 't.due_date >= dated_from' %}
+        {% assign undated = in_project | where_exp: 't', 't.due_date == nil or t.due_date < dated_from' %}
+        {% assign in_project = dated | sort: 'due_date' %}
+        {% if task_sort_desc %}{% assign in_project = in_project | reverse %}{% endif %}
+        {% assign in_project = in_project | concat: undated %}
+      {% elsif task_sort_field == 'priority' %}
+        {% assign in_project = in_project | sort: 'priority' %}
+        {% if task_sort_desc %}{% assign in_project = in_project | reverse %}{% endif %}
+      {% elsif task_sort_field == 'alphabetical' or task_sort_field == 'project' %}
+        {% assign in_project = in_project | sort: 'title' %}
+        {% if task_sort_desc %}{% assign in_project = in_project | reverse %}{% endif %}
+      {% endif %}
       {% assign regrouped = regrouped | concat: in_project %}
     {% endfor %}
     {% assign shown = regrouped %}

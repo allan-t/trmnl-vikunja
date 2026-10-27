@@ -76,6 +76,46 @@ custom_fields:
   group: Display options
   description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
   default: true
+- keyname: task_sort_field
+  field_type: select
+  name: Task sort field
+  group: Display options
+  description: Sort field for Tasks. In grouped mode this sorts Tasks within each Project group.
+  default: due_date
+  options:
+  - Unsorted: unsorted
+  - Due date: due_date
+  - Priority: priority
+  - Project: project
+  - Alphabetical: alphabetical
+- keyname: task_sort_direction
+  field_type: select
+  name: Task sort direction
+  group: Display options
+  description: Sort direction for Task sorting. Ignored when Task sort field is Unsorted.
+  default: asc
+  options:
+  - Ascending: asc
+  - Descending: desc
+- keyname: project_sort_field
+  field_type: select
+  name: Project group sort field
+  group: Display options
+  description: Grouped mode only. Sort order for Project headers.
+  default: unsorted
+  options:
+  - Unsorted: unsorted
+  - Alphabetical: alphabetical
+  - Project filter order: project_filter_order
+- keyname: project_sort_direction
+  field_type: select
+  name: Project group sort direction
+  group: Display options
+  description: Grouped mode only. Sort direction for Project header ordering. Ignored when Project group sort field is Unsorted.
+  default: asc
+  options:
+  - Ascending: asc
+  - Descending: desc
 - keyname: author_bio
   field_type: author_bio
   name: About This Recipe
