@@ -7,10 +7,7 @@ polling_verb: get
 framework_version: latest
 serverless_language: ''
 refresh_interval_floor: ''
-polling_url: |-
-  {%- if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif -%}
-  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/tasks?per_page=50&filter=done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }})&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
-  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/projects
+polling_url: "{%- if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/tasks?per_page=50&filter=done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }})&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/projects"
 polling_headers: authorization=Bearer {{ api_token }}
 polling_body: ''
 id: 520678
