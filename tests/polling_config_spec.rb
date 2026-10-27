@@ -80,6 +80,13 @@ RSpec.describe 'Polling config' do
       expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq(filter)
     end
 
+    it 'normalises dueDate to due_date so filters copied from Vikunja work' do
+      filter = 'done = false && dueDate < now+7d'
+      url = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => filter)).split("\n").first.strip
+
+      expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq('done = false && due_date < now+7d')
+    end
+
     ['', '   ', nil].each do |blank|
       it "fetches at most one Task when the filter is blank (#{blank.inspect})" do
         blank_out = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => blank)).split("\n").map(&:strip).reject(&:empty?)
