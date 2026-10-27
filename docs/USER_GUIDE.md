@@ -23,14 +23,16 @@ Vikunja **2.4.0 or newer**: the Recipe reads the [Vikunja API v2](https://try.vi
 
 ## Settings
 
+The form groups the filter settings under **Filter options** and Group by Project under **Display options**.
+
 | Setting | What it does |
 | --- | --- |
 | Vikunja base URL | Where your Vikunja lives. Blank means Vikunja Cloud. |
 | Vikunja API token | Lets the Recipe read your Tasks and Projects. |
 | Task source | **Standard** (default) uses the Projects and Priority settings below and shows open Tasks. **Custom filter** uses only the filter you write in **Custom filter**. |
-| Custom filter | Used in Custom filter mode, for example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. |
-| Projects to show | Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
-| Priority levels to show | Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
+| Custom filter | Custom filter mode only (hidden in Standard mode). For example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. |
+| Projects to show | Standard mode only (hidden in Custom filter mode). Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
+| Priority levels to show | Standard mode only (hidden in Custom filter mode). Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
 | Group by Project | On: Tasks sit under a header for each Project. Off: one list of `Project - Task` rows. |
 
 ## What you'll see
