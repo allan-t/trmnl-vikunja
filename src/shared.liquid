@@ -111,9 +111,9 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
+  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, task_source_mode (custom_filter = the user's own filter already selected the Tasks, so project_filter is ignored), project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
   Layout files pass tasks_page: IDX_0, projects_page: IDX_1, utc_offset: trmnl.user.utc_offset and
-  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, because partials cannot read trmnl.
+  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, because partials cannot read trmnl.
   group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second. Every Task is rendered; fit_script hides the ones that do not fit.
   Tasks carry only project_id, so the Project name is looked up in projects.
@@ -141,7 +141,7 @@
       {% assign wanted_clean = wanted_clean | concat: one_name %}
     {% endif %}
   {% endfor %}
-  {% if wanted_clean.size > 0 %}
+  {% if wanted_clean.size > 0 and task_source_mode != 'custom_filter' %}
     {% assign filtering_projects = true %}
     {% assign kept_projects = '' | split: ',' %}
     {% for candidate in projects %}

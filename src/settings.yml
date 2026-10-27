@@ -7,7 +7,7 @@ polling_verb: get
 framework_version: latest
 serverless_language: ''
 refresh_interval_floor: ''
-polling_url: "{%- if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page=50&filter=done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }})&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
+polling_url: "{%- if task_source_mode == 'custom_filter' %}{% assign tasks_filter = custom_filter | default: '' | url_encode %}{% else %}{% if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif %}{% capture tasks_filter %}done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }}){% endcapture %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page=50&filter={{ tasks_filter }}&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
 polling_headers: authorization=Bearer {{ api_token }}
 polling_body: ''
 id: 520678
@@ -25,6 +25,20 @@ custom_fields:
   field_type: password
   name: Vikunja API token
   description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
+- keyname: task_source_mode
+  field_type: select
+  name: Task source
+  description: Standard uses the Projects and Priority settings below. Custom filter uses only the filter you write.
+  default: standard
+  options:
+  - Standard: standard
+  - Custom filter: custom_filter
+- keyname: custom_filter
+  field_type: string
+  optional: true
+  name: Custom filter
+  description: Used in Custom filter mode; replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters.
+  placeholder: done = false && priority >= 3
 - keyname: project_names
   field_type: multi_string
   optional: true

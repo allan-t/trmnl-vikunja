@@ -27,6 +27,8 @@ Vikunja **2.4.0 or newer**: the Recipe reads the [Vikunja API v2](https://try.vi
 | --- | --- |
 | Vikunja base URL | Where your Vikunja lives. Blank means Vikunja Cloud. |
 | Vikunja API token | Lets the Recipe read your Tasks and Projects. |
+| Task source | **Standard** (default) uses the Projects and Priority settings below and shows open Tasks. **Custom filter** uses only the filter you write in **Custom filter**. |
+| Custom filter | Used in Custom filter mode, for example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. |
 | Projects to show | Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
 | Priority levels to show | Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
 | Group by Project | On: Tasks sit under a header for each Project. Off: one list of `Project - Task` rows. |
@@ -43,9 +45,14 @@ The Recipe fills the space your layout has. Tasks that don't fit are left out, a
 | **Half vertical** | **Quadrant** |
 | ![Half vertical layout](screenshots/half_vertical-grouped.png) | ![Quadrant layout](screenshots/quadrant-grouped.png) |
 
+## Custom filter mode
+
+Switch **Task source** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters).
+
 ## Limits
 
 - The Recipe reads up to **50 open Tasks** per refresh, picked after your Priority filter. Your Vikunja instance silently caps this at its own maximum page size, so a self-hosted instance configured below 50 shows fewer. Projects are filtered after that, so if you have many open Tasks in Projects you've hidden, some Tasks in the Projects you show may not appear.
+- In Custom filter mode the same cap applies: the Recipe reads the first 50 Tasks your filter matches, in the sort order above.
 - The screen refreshes every 15 minutes.
 
 ## Troubleshooting

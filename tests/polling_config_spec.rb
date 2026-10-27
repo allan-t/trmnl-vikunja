@@ -58,6 +58,38 @@ RSpec.describe 'Polling config' do
     end
   end
 
+  describe 'Custom filter mode' do
+    let(:custom) { fields.merge('task_source_mode' => 'custom_filter', 'custom_filter' => 'done = false && (priority >= 3 || due_date < now+7d)') }
+    let(:out) { Liquid::Template.parse(settings['polling_url']).render(custom).split("\n").map(&:strip).reject(&:empty?) }
+    let(:query) { URI.decode_www_form(URI(out.first).query) }
+
+    it 'polls the same request as before in standard mode, set explicitly or not' do
+      explicit = Liquid::Template.parse(settings['polling_url']).render(fields.merge('task_source_mode' => 'standard', 'custom_filter' => 'priority = 1'))
+      expect(explicit).to eq(Liquid::Template.parse(settings['polling_url']).render(fields))
+    end
+
+    it 'sends only the typed filter, with the fixed page size and sort' do
+      expect(query).to eq([['per_page', '50'], ['filter', 'done = false && (priority >= 3 || due_date < now+7d)'],
+                           %w[sort_by due_date], %w[sort_by priority], %w[order_by asc], %w[order_by desc]])
+    end
+
+    it 'encodes every filter character so it survives as a query value' do
+      filter = 'a = 1 && b || c < 2 > 1 & (x) + y = "z" #'
+      url = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => filter)).split("\n").first.strip
+      expect(url.split('filter=').last.split('&sort_by').first).to match(/\A[A-Za-z0-9%+._~-]+\z/)
+      expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq(filter)
+    end
+
+    it 'leaves the Projects request unchanged' do
+      expect(out.last).to eq('https://v.example/api/v2/projects')
+    end
+
+    it 'ignores Priority levels' do
+      with_levels = Liquid::Template.parse(settings['polling_url']).render(custom.merge('priority_levels' => %w[1]))
+      expect(with_levels).to eq(Liquid::Template.parse(settings['polling_url']).render(custom))
+    end
+  end
+
   it 'sends the API token as a bearer Authorization header' do
     expect(settings['polling_headers']).to eq('authorization=Bearer {{ api_token }}')
   end
@@ -65,9 +97,14 @@ RSpec.describe 'Polling config' do
   it 'takes the base URL, API token and grouping as settings, the token as a password field' do
     fields = settings['custom_fields'].reject { |f| f['field_type'] == 'author_bio' }.to_h { |f| [f['keyname'], f] }
 
-    expect(fields.keys).to contain_exactly('base_url', 'api_token', 'project_names', 'priority_levels', 'group_by_project')
+    expect(fields.keys).to contain_exactly('base_url', 'api_token', 'task_source_mode', 'custom_filter', 'project_names', 'priority_levels',
+                                         'group_by_project')
     expect(fields['base_url']['field_type']).to eq('string')
     expect(fields['api_token']['field_type']).to eq('password')
+    expect(fields['task_source_mode']['field_type']).to eq('select')
+    expect(fields['task_source_mode']['default']).to eq('standard')
+    expect(fields['task_source_mode']['options'].flat_map(&:values)).to eq(%w[standard custom_filter])
+    expect(fields['custom_filter']['optional']).to be(true)
   end
 
   it 'does not hardcode a token' do
