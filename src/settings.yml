@@ -5,31 +5,36 @@ dark_mode: 'no'
 static_data: ''
 polling_verb: get
 framework_version: latest
+serverless_language: ''
+refresh_interval_floor: ''
 polling_url: |-
   {{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
   {{ base_url }}/api/v1/projects
 polling_headers: authorization=Bearer {{ api_token }}
+polling_body: ''
 id: 520678
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
+custom_fields:
+- keyname: base_url
+  field_type: string
+  name: Vikunja base URL
+  description: Your instance URL without a trailing slash, e.g. vikunja.example.com with https in front
+  placeholder: https://vikunja.example.com
+- keyname: api_token
+  field_type: password
+  name: Vikunja API token
+  description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
+- keyname: group_by_project
+  field_type: boolean
+  name: Group by Project
+  description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
+  default: true
+- keyname: author_bio
+  field_type: author_bio
+  name: About This Recipe
+  description: Displays your open Vikunja Tasks across all Projects.
+  github_url: https://github.com/allan-t/trmnl-vikunja
 name: Vikunja Tasks
 description: Open Vikunja Tasks at a glance
 refresh_interval: 15
-custom_fields:
-  - keyname: base_url
-    field_type: string
-    name: Vikunja base URL
-    description: Your instance URL without a trailing slash, e.g. vikunja.example.com with https in front
-    placeholder: https://vikunja.example.com
-  - keyname: api_token
-    field_type: password
-    name: Vikunja API token
-    description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
-  - keyname: group_by_project
-    field_type: boolean
-    name: Group by Project
-    description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
-    default: true
-  - keyname: author_bio
-    field_type: author_bio
-    name: About This Recipe
-    description: Displays your open Vikunja Tasks across all Projects.
-    github_url: https://github.com/allan-t/trmnl-vikunja
