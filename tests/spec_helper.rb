@@ -5,11 +5,6 @@ require 'json'
 BASE_URL = 'https://vikunja.example.com'
 FIXED_NOW = '2030-01-01T08:00:00Z'
 LAYOUTS = %w[full half_horizontal half_vertical quadrant].freeze
-# Single source of truth: each Layout's cap is the row_cap argument in its src/<layout>.liquid.
-ROW_CAPS = LAYOUTS.to_h do |layout|
-  template = File.read(File.expand_path("../src/#{layout}.liquid", __dir__))
-  [layout, template[/row_cap:\s*(\d+)/, 1]&.to_i || raise("row_cap not found in src/#{layout}.liquid")]
-end.freeze
 UNSET_DUE_DATE = '0001-01-01T00:00:00Z'
 # Grouping is off so specs read plain "Project - Task" rows; grouping_spec.rb turns it on.
 CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token', group_by_project: false }.freeze

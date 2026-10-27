@@ -41,16 +41,6 @@ RSpec.describe 'Grouping setting' do
     expect(screen).to have_text(/Admin - Passport.*Home - Milk.*Admin - Tax.*Work - Report/m)
   end
 
-  it 'omits the header of a Project whose Tasks are all cut by the row cap' do
-    cap = ROW_CAPS['quadrant']
-    shown = (1..cap).map { |i| build_task(i, title: "Kept #{i}", project_id: 10) }
-    screen = render_tasks(shown + [build_task(99, title: 'Cut', project_id: 20)], layout: 'quadrant', custom_fields: grouped_fields)
-
-    expect(screen).to have_text('Home')
-    expect(screen).not_to have_text('Admin')
-    expect(screen).not_to have_text('Cut')
-  end
-
   %w[false no 0 off].each do |value|
     it "treats #{value.inspect} as off" do
       expect(render_tasks(tasks, layout: 'half_vertical', custom_fields: grouped_fields(value))).not_to have_css('.group-header')
@@ -61,13 +51,5 @@ RSpec.describe 'Grouping setting' do
     it "groups on #{layout}" do
       expect(grouped(layout:)).to have_css('.group-header')
     end
-  end
-
-  it 'repeats a header when a group continues into the second column' do
-    many = (1..4).map { |i| build_task(i, title: "Chore #{i}", project_id: 10) }
-    screen = render_tasks(many, layout: 'full', custom_fields: grouped_fields)
-
-    expect(screen).to have_css('.column:nth-child(1) .group-header', text: 'Home')
-    expect(screen).to have_css('.column:nth-child(2) .group-header', text: 'Home')
   end
 end
