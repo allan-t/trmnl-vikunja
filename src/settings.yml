@@ -7,7 +7,7 @@ polling_verb: get
 framework_version: latest
 serverless_language: ''
 refresh_interval_floor: ''
-polling_url: "{%- if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page=50&filter=done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }})&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
+polling_url: "{%- assign per_page = 50 %}{% if task_source_mode == 'custom_filter' %}{% assign tasks_filter = custom_filter | default: '' | url_encode %}{% assign filter_text = custom_filter | default: '' | strip %}{% if filter_text == '' %}{% assign per_page = 1 %}{% endif %}{% else %}{% if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif %}{% capture tasks_filter %}done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }}){% endcapture %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page={{ per_page }}&filter={{ tasks_filter }}&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
 polling_headers: authorization=Bearer {{ api_token }}
 polling_body: ''
 id: 520678
@@ -25,18 +25,43 @@ custom_fields:
   field_type: password
   name: Vikunja API token
   description: Create one in Vikunja under Settings > API Tokens (read access to Tasks and Projects).
+- keyname: task_source_mode
+  field_type: select
+  name: Filter mode
+  group: Filter options
+  description: Mode decides which Tasks show. Standard uses the Projects and Priority settings below. Custom filter uses only the filter you write.
+  default: standard
+  options:
+  - Standard: standard
+  - Custom filter: custom_filter
+  conditional_validation:
+  - when: custom_filter
+    hidden:
+    - project_names
+    - priority_levels
+    visible:
+    - custom_filter
+- keyname: custom_filter
+  field_type: string
+  optional: true
+  name: Custom filter
+  group: Filter options
+  description: Custom filter mode only. Replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters.
+  placeholder: done = false && priority >= 3
 - keyname: project_names
   field_type: multi_string
   optional: true
   name: Projects to show
-  description: Only Tasks from these Projects are shown. Enter Project names, separated by commas. Leave empty to show all Projects.
+  group: Filter options
+  description: Standard mode only. Only Tasks from these Projects are shown. Enter Project names, separated by commas. Leave empty to show all Projects.
   placeholder: Home, Work
 - keyname: priority_levels
   field_type: select
   multiple: true
   optional: true
   name: Priority levels to show
-  description: Only Tasks with these Priorities are shown. Leave empty to show all.
+  group: Filter options
+  description: Standard mode only. Only Tasks with these Priorities are shown. Leave empty to show all.
   help_text: Use <kbd>⌘</kbd>+<kbd>click</kbd> or <kbd>ctrl</kbd>+<kbd>click</kbd> to select and deselect multiple options.
   options:
   - Unset: 0
@@ -48,6 +73,7 @@ custom_fields:
 - keyname: group_by_project
   field_type: boolean
   name: Group by Project
+  group: Display options
   description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
   default: true
 - keyname: author_bio
