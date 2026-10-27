@@ -55,3 +55,4 @@ The helpers live in `tests/spec_helper.rb`. CI (`.github/workflows/test.yml`) ru
 
 - [Vikunja API v2 docs](https://try.vikunja.io/api/v2/docs)
 - [TRMNL developer docs](https://docs.usetrmnl.com/go/)
+- [TRMNL custom plugin form builder](https://help.trmnl.com/en/articles/10513740-custom-plugin-form-builder): every `custom_fields` key in `src/settings.yml`, including `group` and `conditional_validation` (hides or shows fields by another field's value). The page is long and gets truncated when fetched, so read past the first page before concluding a key does not exist.
