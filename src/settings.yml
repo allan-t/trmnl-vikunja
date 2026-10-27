@@ -28,29 +28,40 @@ custom_fields:
 - keyname: task_source_mode
   field_type: select
   name: Task source
+  group: Filter options
   description: Standard uses the Projects and Priority settings below. Custom filter uses only the filter you write.
   default: standard
   options:
   - Standard: standard
   - Custom filter: custom_filter
+  conditional_validation:
+  - when: custom_filter
+    hidden:
+    - project_names
+    - priority_levels
+    visible:
+    - custom_filter
 - keyname: custom_filter
   field_type: string
   optional: true
   name: Custom filter
-  description: Used in Custom filter mode; replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters.
+  group: Filter options
+  description: Custom filter mode only. Replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters.
   placeholder: done = false && priority >= 3
 - keyname: project_names
   field_type: multi_string
   optional: true
   name: Projects to show
-  description: Only Tasks from these Projects are shown. Enter Project names, separated by commas. Leave empty to show all Projects.
+  group: Filter options
+  description: Standard mode only. Only Tasks from these Projects are shown. Enter Project names, separated by commas. Leave empty to show all Projects.
   placeholder: Home, Work
 - keyname: priority_levels
   field_type: select
   multiple: true
   optional: true
   name: Priority levels to show
-  description: Only Tasks with these Priorities are shown. Leave empty to show all.
+  group: Filter options
+  description: Standard mode only. Only Tasks with these Priorities are shown. Leave empty to show all.
   help_text: Use <kbd>⌘</kbd>+<kbd>click</kbd> or <kbd>ctrl</kbd>+<kbd>click</kbd> to select and deselect multiple options.
   options:
   - Unset: 0
@@ -62,6 +73,7 @@ custom_fields:
 - keyname: group_by_project
   field_type: boolean
   name: Group by Project
+  group: Display options
   description: Show Tasks under a header per Project. Switch off for one list with Project - Task rows.
   default: true
 - keyname: author_bio
