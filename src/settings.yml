@@ -7,7 +7,7 @@ polling_verb: get
 framework_version: latest
 serverless_language: ''
 refresh_interval_floor: ''
-polling_url: "{%- assign per_page = 50 %}{% if task_source_mode == 'custom_filter' %}{% assign tasks_filter_raw = custom_filter | default: '' %}{% assign filter_text = tasks_filter_raw | strip %}{% assign tasks_filter_normalised = tasks_filter_raw | replace: 'dueDate', 'due_date' %}{% assign tasks_filter = tasks_filter_normalised | url_encode %}{% if filter_text == '' %}{% assign per_page = 1 %}{% endif %}{% else %}{% if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif %}{% capture tasks_filter %}done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }}){% endcapture %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page={{ per_page }}&filter={{ tasks_filter }}&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
+polling_url: "{%- assign per_page = 50 %}{% if task_source_mode == 'custom_filter' %}{% assign tasks_filter_raw = custom_filter | default: '' %}{% assign filter_text = tasks_filter_raw | strip %}{% assign tasks_filter_normalised = tasks_filter_raw | replace: 'dueDate', 'due_date' | replace: 'startDate', 'start_date' | replace: 'endDate', 'end_date' | replace: 'doneAt', 'done_at' | replace: 'percentDone', 'percent_done' | replace: 'createdBy', 'created_by' %}{% assign tasks_filter = tasks_filter_normalised | url_encode %}{% if filter_text == '' %}{% assign per_page = 1 %}{% endif %}{% else %}{% if priority_levels == blank %}{% assign priority_levels_normalised = '0,1,2,3,4,5' | split: ',' %}{% else %}{% assign priority_levels_normalised = priority_levels | join: ',' | split: ',' %}{% endif %}{% capture tasks_filter %}done%20%3D%20false%20%26%26%20(priority%20%3D%20{{ priority_levels_normalised | join: '%20%7C%7C%20priority%20%3D%20' }}){% endcapture %}{% endif -%}\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/tasks?per_page={{ per_page }}&filter={{ tasks_filter }}&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v2/projects"
 polling_headers: authorization=Bearer {{ api_token }}
 polling_body: ''
 id: 520678
@@ -46,7 +46,7 @@ custom_fields:
   optional: true
   name: Custom filter
   group: Filter options
-  description: Custom filter mode only. Replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters. dueDate is accepted and sent as due_date.
+  description: Custom filter mode only. Replaces the Projects and Priority settings. Syntax at vikunja.io/docs/filters. UI camelCase fields are accepted and rewritten to API snake_case.
   placeholder: done = false && priority >= 3
 - keyname: project_names
   field_type: multi_string

@@ -30,7 +30,7 @@ The form groups the filter settings under **Filter options** and Group by Projec
 | Vikunja base URL | Where your Vikunja lives. Blank means Vikunja Cloud. |
 | Vikunja API token | Lets the Recipe read your Tasks and Projects. |
 | Filter mode | **Standard** (default) uses the Projects and Priority settings below and shows open Tasks. **Custom filter** uses only the filter you write in **Custom filter**. |
-| Custom filter | Custom filter mode only (hidden in Standard mode). For example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. If you paste `dueDate`, the Recipe converts it to `due_date` before calling the API. |
+| Custom filter | Custom filter mode only (hidden in Standard mode). For example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. For copied web-UI filters, camelCase fields such as `dueDate`, `startDate`, `endDate`, `doneAt`, `percentDone` and `createdBy` are converted to API snake_case automatically. |
 | Projects to show | Standard mode only (hidden in Custom filter mode). Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
 | Priority levels to show | Standard mode only (hidden in Custom filter mode). Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
 | Group by Project | On: Tasks sit under a header for each Project. Off: one list of `Project - Task` rows. |
@@ -49,7 +49,7 @@ The Recipe fills the space your layout has. Tasks that don't fit are left out, a
 
 ## Custom filter mode
 
-Switch **Filter mode** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters). For compatibility with copied filters, `dueDate` is accepted and rewritten to `due_date`.
+Switch **Filter mode** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters). For compatibility with copied filters, web-UI camelCase fields are accepted and rewritten to API snake_case.
 
 ## Limits
 
