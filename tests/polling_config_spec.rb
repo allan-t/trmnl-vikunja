@@ -80,6 +80,15 @@ RSpec.describe 'Polling config' do
       expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq(filter)
     end
 
+    it 'normalises Vikunja UI camelCase field names to API snake_case' do
+      filter = 'done = false && dueDate < now+7d && startDate <= now && endDate >= now && doneAt > now-1d && percentDone < 100 && createdBy = "alice"'
+      url = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => filter)).split("\n").first.strip
+
+      expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq(
+        'done = false && due_date < now+7d && start_date <= now && end_date >= now && done_at > now-1d && percent_done < 100 && created_by = "alice"'
+      )
+    end
+
     ['', '   ', nil].each do |blank|
       it "fetches at most one Task when the filter is blank (#{blank.inspect})" do
         blank_out = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => blank)).split("\n").map(&:strip).reject(&:empty?)
