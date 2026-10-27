@@ -80,6 +80,17 @@ RSpec.describe 'Polling config' do
       expect(URI.decode_www_form(URI(url).query).to_h['filter']).to eq(filter)
     end
 
+    ['', '   ', nil].each do |blank|
+      it "fetches at most one Task when the filter is blank (#{blank.inspect})" do
+        blank_out = Liquid::Template.parse(settings['polling_url']).render(custom.merge('custom_filter' => blank)).split("\n").map(&:strip).reject(&:empty?)
+        blank_query = URI.decode_www_form(URI(blank_out.first).query)
+
+        expect(blank_query.first).to eq(%w[per_page 1])
+        expect(blank_query.to_h['filter'].to_s.strip).to eq('')
+        expect(blank_out.last).to eq('https://v.example/api/v2/projects')
+      end
+    end
+
     it 'leaves the Projects request unchanged' do
       expect(out.last).to eq('https://v.example/api/v2/projects')
     end

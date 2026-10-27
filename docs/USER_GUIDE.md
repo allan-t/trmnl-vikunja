@@ -29,7 +29,7 @@ The form groups the filter settings under **Filter options** and Group by Projec
 | --- | --- |
 | Vikunja base URL | Where your Vikunja lives. Blank means Vikunja Cloud. |
 | Vikunja API token | Lets the Recipe read your Tasks and Projects. |
-| Task source | **Standard** (default) uses the Projects and Priority settings below and shows open Tasks. **Custom filter** uses only the filter you write in **Custom filter**. |
+| Filter mode | **Standard** (default) uses the Projects and Priority settings below and shows open Tasks. **Custom filter** uses only the filter you write in **Custom filter**. |
 | Custom filter | Custom filter mode only (hidden in Standard mode). For example `done = false && priority >= 3`. See [Vikunja's filter syntax](https://vikunja.io/docs/filters). Your filter is the only thing that picks Tasks: nothing like "not done" is added, so include `done = false` if you want open Tasks only. **Projects to show** and **Priority levels to show** are ignored. |
 | Projects to show | Standard mode only (hidden in Custom filter mode). Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
 | Priority levels to show | Standard mode only (hidden in Custom filter mode). Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
@@ -49,7 +49,7 @@ The Recipe fills the space your layout has. Tasks that don't fit are left out, a
 
 ## Custom filter mode
 
-Switch **Task source** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters).
+Switch **Filter mode** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters).
 
 ## Limits
 
@@ -60,8 +60,8 @@ Switch **Task source** to **Custom filter** and type a filter such as `done = fa
 ## Troubleshooting
 
 - **"Could not load tasks"**: the Base URL or API token is wrong, the token lacks read access to Tasks and Projects, or Vikunja can't be reached from the internet. Check the URL opens in a browser and create a fresh token.
-- **"Could not load tasks. Check the custom filter syntax."**: Vikunja rejected your filter in Custom filter mode. Check it against [Vikunja's filter syntax](https://vikunja.io/docs/filters). TRMNL gives the Recipe the error Vikunja sent back but not the HTTP status, so the Recipe recognises a rejected filter by Vikunja's filter error codes (4016-4019 and 4024). If your filter is fine and you still see the message above about the URL and API token, the problem is the connection or token.
-- **"Custom filter mode is on but no filter is set. Enter a Vikunja filter in the settings."**: **Task source** is set to Custom filter but **Custom filter** is empty. The Recipe never falls back to showing all Tasks; enter a filter, or switch **Task source** back to Standard.
+- **"Could not load tasks. Check the custom filter syntax."**: Vikunja rejected your filter in Custom filter mode. Check it against [Vikunja's filter syntax](https://vikunja.io/docs/filters). TRMNL gives the Recipe the error Vikunja sent back but not the HTTP status, so the Recipe recognises a rejected filter by Vikunja's filter error codes (4016-4019, 4024 and 4033). If your filter is fine and you still see the message above about the URL and API token, the problem is the connection or token.
+- **"Custom filter mode is on but no filter is set. Enter a Vikunja filter in the settings."**: **Filter mode** is set to Custom filter but **Custom filter** is empty. The Recipe never falls back to showing all Tasks; enter a filter, or switch **Filter mode** back to Standard.
 - **"No tasks match the custom filter"**: your filter is valid but matches no Tasks. Loosen it, or test it in Vikunja.
 - **"No open tasks"**: you have none, or your filters leave nothing. Clear **Projects to show** and **Priority levels to show** to check.
 - **"No open tasks in the selected Projects"**: none of the names in **Projects to show** match a Project with open Tasks. Check the spelling.

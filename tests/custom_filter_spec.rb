@@ -67,7 +67,7 @@ RSpec.describe 'Custom filter mode' do
       end
     end
 
-    [4016, 4017, 4018, 4019, 4024].each do |code|
+    FILTER_ERROR_CODES.each do |code|
       it "recognises Vikunja error #{code} as a filter problem" do
         expect(render_rejected(code)).to have_text('Check the custom filter syntax.')
       end

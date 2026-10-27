@@ -7,6 +7,8 @@ require 'json'
 BASE_URL = 'https://vikunja.example.com'
 FIXED_NOW = '2030-01-01T08:00:00Z'
 LAYOUTS = %w[full half_horizontal half_vertical quadrant].freeze
+# Vikunja's invalid filter errors (HTTP 400); the Recipe recognises a rejected filter by these codes.
+FILTER_ERROR_CODES = [4016, 4017, 4018, 4019, 4024, 4033].freeze
 UNSET_DUE_DATE = '0001-01-01T00:00:00Z'
 # Grouping is off so specs read plain "Project - Task" rows; grouping_spec.rb turns it on.
 CUSTOM_FIELDS = { base_url: BASE_URL, api_token: 'secret-token', group_by_project: false }.freeze
@@ -40,7 +42,7 @@ module RenderHelpers
   def render_tasks(tasks, **) = render_screen(mocks: vikunja_mocks(tasks:), **)
 
   def failing_mocks(status: 401)
-    body = { status:, json: { code: 1011, message: 'invalid token' } }
+    body = { status:, json: { code: 11, message: 'invalid token' } }
     { "#{BASE_URL}/api/v2/tasks" => body, "#{BASE_URL}/api/v2/projects" => body }
   end
 end
