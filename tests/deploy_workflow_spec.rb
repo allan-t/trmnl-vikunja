@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
 RSpec.describe 'deployment workflow gates' do
   let(:workflow_path) { File.expand_path('../.github/workflows/test.yml', __dir__) }
   let(:workflow) { File.read(workflow_path) }
+  let(:workflow_yaml) { YAML.safe_load(workflow, aliases: true) }
   let(:readme) { File.read(File.expand_path('../README.md', __dir__)) }
 
   it 'keeps the test and deploy jobs in the same workflow' do
+    expect { workflow_yaml }.not_to raise_error
     expect(workflow).to include('jobs:')
     expect(workflow).to include('test:')
     expect(workflow).to include('deploy:')
