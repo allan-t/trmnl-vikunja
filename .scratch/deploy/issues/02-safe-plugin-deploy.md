@@ -1,5 +1,5 @@
 Type: task
-Status: resolved
+Status: wontfix
 
 # Safe private-plugin deploy
 
@@ -14,3 +14,7 @@ Ensure the deploy path is safe for the repo's private plugin and that repo-side 
 - Keep the guidance in repo documentation only; do not introduce a wizard or live-dashboard instruction flow.
 
 This is captured in the repo docs and the static deployment workflow contract tests.
+
+## Comments
+
+Closed as `wontfix`: the project no longer treats deployment as a supported repo workflow, so the private-plugin safety rules are retained only as historical documentation and not as an active implementation path.

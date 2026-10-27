@@ -6,8 +6,8 @@ static_data: ''
 polling_verb: get
 framework_version: latest
 polling_url: |-
-  {{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
-  {{ base_url }}/api/v1/projects
+  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
+  {{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}/api/v1/projects
 polling_headers: authorization=Bearer {{ api_token }}
 id: 520678
 name: Vikunja Tasks
@@ -17,8 +17,10 @@ custom_fields:
   - keyname: base_url
     field_type: string
     name: Vikunja base URL
-    description: Your instance URL without a trailing slash, e.g. vikunja.example.com with https in front
-    placeholder: https://vikunja.example.com
+    description: Leave blank for Vikunja Cloud (https://app.vikunja.cloud). Self-hosting? Enter your instance URL, e.g. https://vikunja.example.com
+    placeholder: https://app.vikunja.cloud
+    default: https://app.vikunja.cloud
+    optional: true
   - keyname: api_token
     field_type: password
     name: Vikunja API token

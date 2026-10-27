@@ -1,6 +1,7 @@
 name: Test
 
 on:
+  pull_request:
   push:
     branches: [main]
 
@@ -19,16 +20,3 @@ jobs:
         run: |
           status="$(git status --porcelain docs/screenshots)"
           if [ -n "$status" ]; then echo "$status"; echo "Run bin/screenshots and commit docs/screenshots."; exit 1; fi
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Ensure recipe plugin id is set
-        run: "grep -q '^id: 520678$' src/settings.yml"
-      - name: Push recipe to TRMNL
-        env:
-          TRMNL_API_KEY: ${{ secrets.TRMNL_API_KEY }}
-        run: |
-          docker run --rm -e TRMNL_API_KEY -v "$PWD:/plugin" trmnl/trmnlp push

@@ -4,11 +4,13 @@ require 'yaml'
 require 'uri'
 
 # Seam 2: a static check of the polling config in src/settings.yml.
+BASE_URL_TAG = "{{ base_url | default: 'https://app.vikunja.cloud' | split: '/' | join: '/' }}"
+
 RSpec.describe 'Polling config' do
   let(:settings) { YAML.safe_load_file(File.join(__dir__, '..', 'src', 'settings.yml')) }
   let(:urls) { settings['polling_url'].split("\n").map(&:strip).reject(&:empty?) }
   let(:tasks_url) { urls.first }
-  let(:tasks_query) { URI.decode_www_form(URI(tasks_url.sub('{{ base_url }}', 'https://v.example')).query) }
+  let(:tasks_query) { URI.decode_www_form(URI(tasks_url.sub(BASE_URL_TAG, 'https://v.example')).query) }
 
   it 'polls over GET' do
     expect(settings['strategy']).to eq('polling')
@@ -20,8 +22,8 @@ RSpec.describe 'Polling config' do
   end
 
   it 'builds both URLs from the base URL setting' do
-    expect(urls).to eq(['{{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc',
-                        '{{ base_url }}/api/v1/projects'])
+    expect(urls).to eq(["#{BASE_URL_TAG}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc",
+                        "#{BASE_URL_TAG}/api/v1/projects"])
   end
 
   it 'requests only open Tasks' do
