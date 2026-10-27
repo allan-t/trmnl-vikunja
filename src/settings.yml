@@ -17,7 +17,7 @@ custom_fields:
   - keyname: base_url
     field_type: string
     name: Vikunja base URL
-    description: Leave blank for Vikunja Cloud (https://app.vikunja.cloud). Self-hosting? Enter your instance URL, e.g. https://vikunja.example.com
+    description: Leave blank for Vikunja Cloud. Self-hosting? Enter your instance URL, e.g. vikunja.example.com with https in front.
     placeholder: https://app.vikunja.cloud
     default: https://app.vikunja.cloud
     optional: true
