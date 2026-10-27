@@ -5,8 +5,8 @@
 RSpec.describe 'Base URL setting' do
   let(:cloud_url) { 'https://app.vikunja.cloud' }
   let(:cloud_mocks) do
-    { "#{cloud_url}/api/v1/tasks" => { json: [build_task(1, title: 'Cloud task')] },
-      "#{cloud_url}/api/v1/projects" => { json: fixture_json('projects') } }
+    { "#{cloud_url}/api/v2/tasks" => { json: paginated([build_task(1, title: 'Cloud task')]) },
+      "#{cloud_url}/api/v2/projects" => { json: paginated(fixture_json('projects')) } }
   end
 
   it 'polls Vikunja Cloud when the Base URL is blank' do

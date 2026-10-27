@@ -16,11 +16,14 @@ def grouped_fields(value = true) = CUSTOM_FIELDS.merge(group_by_project: value)
 
 def fixture_json(name) = JSON.parse(File.read(File.join(__dir__, 'fixtures', "#{name}.json")))
 
+# A v2 collection response: the list sits in `items` (null when empty) next to the pagination fields.
+def paginated(items) = { items: items.empty? ? nil : items, page: 1, per_page: 50, total: items.size, total_pages: 1 }
+
 # Mocks for the two polling requests: open Tasks (IDX_0) and Projects (IDX_1).
 def vikunja_mocks(tasks: fixture_json('tasks'), projects: fixture_json('projects'))
   {
-    "#{BASE_URL}/api/v1/tasks" => { json: tasks },
-    "#{BASE_URL}/api/v1/projects" => { json: projects }
+    "#{BASE_URL}/api/v2/tasks" => { json: paginated(tasks) },
+    "#{BASE_URL}/api/v2/projects" => { json: paginated(projects) }
   }
 end
 
@@ -38,7 +41,7 @@ module RenderHelpers
 
   def failing_mocks(status: 401)
     body = { status:, json: { code: 1011, message: 'invalid token' } }
-    { "#{BASE_URL}/api/v1/tasks" => body, "#{BASE_URL}/api/v1/projects" => body }
+    { "#{BASE_URL}/api/v2/tasks" => body, "#{BASE_URL}/api/v2/projects" => body }
   end
 end
 

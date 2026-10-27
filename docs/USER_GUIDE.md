@@ -2,6 +2,10 @@
 
 This Recipe shows your open [Vikunja](https://vikunja.io) Tasks on your TRMNL. You set it up entirely inside TRMNL and Vikunja; you don't need to run anything yourself.
 
+## Requirements
+
+Vikunja **2.4.0 or newer**: the Recipe reads the [Vikunja API v2](https://try.vikunja.io/api/v2/docs), which 2.4.0 introduced. Vikunja Cloud is always current.
+
 ## Install
 
 1. Download `trmnl-vikunja-<version>.zip` from the [latest release](https://github.com/allan-t/trmnl-vikunja/releases/latest). Don't unzip it.
@@ -41,7 +45,7 @@ The Recipe fills the space your layout has. Tasks that don't fit are left out, a
 
 ## Limits
 
-- The Recipe reads up to **50 open Tasks** per refresh, picked after your Priority filter. Projects are filtered after that, so if you have many open Tasks in Projects you've hidden, some Tasks in the Projects you show may not appear.
+- The Recipe reads up to **50 open Tasks** per refresh, picked after your Priority filter. Your Vikunja instance silently caps this at its own maximum page size, so a self-hosted instance configured below 50 shows fewer. Projects are filtered after that, so if you have many open Tasks in Projects you've hidden, some Tasks in the Projects you show may not appear.
 - The screen refreshes every 15 minutes.
 
 ## Troubleshooting

@@ -16,7 +16,7 @@ RSpec.describe 'Full layout states' do
   end
 
   it 'shows an error message when only the Projects request fails' do
-    mocks = vikunja_mocks.merge("#{BASE_URL}/api/v1/projects" => failing_mocks["#{BASE_URL}/api/v1/projects"])
+    mocks = vikunja_mocks.merge("#{BASE_URL}/api/v2/projects" => failing_mocks["#{BASE_URL}/api/v2/projects"])
     screen = render_screen(mocks:)
 
     expect(screen).to have_text(/Could not load tasks/)
