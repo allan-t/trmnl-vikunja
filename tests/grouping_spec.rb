@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# The "Group by Project" setting: on lists Tasks under one header per Project, off lists "Project - Task"
+# rows, and unset means on. These specs show the headers, row text and ordering for each setting value.
 RSpec.describe 'Grouping setting' do
   let(:tasks) do
     [build_task(1, title: 'Passport', project_id: 20), build_task(2, title: 'Milk', project_id: 10),

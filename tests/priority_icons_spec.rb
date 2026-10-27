@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# How a Task's Priority (0 to 5) is shown on its row: no icon for 0 and 1, a medium icon for 2 and 3, a
+# high icon for 4 and 5.
 RSpec.describe 'Full layout' do
   describe 'Priority icons' do
     def screen_for(priority) = render_tasks([build_task(priority, title: "Prio#{priority}", priority:)])

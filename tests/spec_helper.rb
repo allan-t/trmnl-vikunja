@@ -2,6 +2,8 @@
 
 require 'json'
 
+# Shared setup for every spec: fixture Vikunja responses, a fixed clock, a Task builder and the render helpers.
+
 BASE_URL = 'https://vikunja.example.com'
 FIXED_NOW = '2030-01-01T08:00:00Z'
 LAYOUTS = %w[full half_horizontal half_vertical quadrant].freeze

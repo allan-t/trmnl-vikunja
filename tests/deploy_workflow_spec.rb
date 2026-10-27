@@ -2,6 +2,9 @@
 
 require 'yaml'
 
+# CI only checks the repo: it runs tests and lint on pushes to main and on pull requests, and never
+# pushes to a live TRMNL Recipe. These specs show the workflow has no deploy step or API key, and
+# that the README does not tell people to set one up.
 RSpec.describe 'CI workflow' do
   let(:workflow_path) { File.expand_path('../.github/workflows/test.yml', __dir__) }
   let(:workflow) { File.read(workflow_path) }

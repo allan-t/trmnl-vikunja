@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# What every Layout (full, half_horizontal, half_vertical, quadrant) has in common: a Task row with its
+# Project, Priority icon and due label, the title bar, and the empty and error screens.
 LAYOUTS.each do |layout|
   RSpec.describe "#{layout} layout" do
     it 'shows each Task with its Project, Priority icon and due label' do
