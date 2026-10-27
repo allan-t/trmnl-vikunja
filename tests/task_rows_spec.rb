@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# The full layout rendered from a fixture Vikunja response and a fixed "now".
+# How the Task rows are built from the Vikunja response: the "Project - Task" text, a Task whose Project is
+# unknown, and the order (undated Tasks last). Rendered from fixtures and a fixed "now".
 RSpec.describe 'Full layout rows' do
   it 'shows each open Task as "Project - Task" in request order' do
     expect(render_screen).to have_text(/Admin - Renew passport.*Home - Buy milk.*Work - Write report/m)

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# How a Task's due date is described under its title (Today, Tomorrow, Overdue Nd, or a date) and that an
+# unset due date shows nothing. Also shows days are counted in the user's time zone. Uses a fixed "now".
 RSpec.describe 'Full layout' do
   describe 'due date labels' do
     def labels_for(due, **) = render_tasks([build_task(1, due_date: due)], **)

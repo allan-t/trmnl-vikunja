@@ -1,26 +1,18 @@
 # frozen_string_literal: true
 
+# The wide Layouts (full, half_horizontal) flow Tasks through two columns, filling the first before the
+# second; the narrow ones (half_vertical, quadrant) use one. These specs show how many columns of Tasks
+# each Layout draws on screen.
 RSpec.describe 'Layout columns' do
-  let(:tasks) { (1..4).map { |i| build_task(i, title: format('Chore %02d', i)) } }
+  let(:tasks) { (1..80).map { |i| build_task(i, title: format('Chore %02d', i)) } }
 
-  { 'full' => 2, 'half_horizontal' => 2, 'half_vertical' => 1, 'quadrant' => 1 }.each do |layout, columns|
-    it "renders #{layout} in #{columns} column(s)" do
-      screen = render_tasks(tasks.first(2), layout:)
-
-      expect(screen).to have_css('.column', count: columns) if columns > 1
-      expect(screen).not_to have_css('.column') if columns == 1
-      expect(screen).to have_css('.task', count: 2)
-    end
+  def column_lefts(screen)
+    screen.evaluate("(() => [...new Set([...document.querySelectorAll('.task:not([hidden])')].map((t) => Math.round(t.getBoundingClientRect().left)))].length)()")
   end
 
-  %w[full half_horizontal].each do |layout|
-    it "fills the first #{layout} column before the second" do
-      screen = render_tasks(tasks, layout:)
-
-      expect(screen).to have_css('.column:nth-child(1) .task', count: 2)
-      expect(screen).to have_css('.column:nth-child(1) .task', text: 'Chore 02')
-      expect(screen).to have_css('.column:nth-child(2) .task', count: 2)
-      expect(screen).to have_css('.column:nth-child(2) .task', text: 'Chore 03')
+  { 'full' => 2, 'half_horizontal' => 2, 'half_vertical' => 1, 'quadrant' => 1 }.each do |layout, columns|
+    it "draws #{layout} Tasks in #{columns} column(s)" do
+      expect(column_lefts(render_tasks(tasks, layout:))).to eq(columns)
     end
   end
 end

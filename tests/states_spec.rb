@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# The screens shown when there is nothing to list or Vikunja cannot be reached: "No open tasks" for an
+# empty list, and a plain error message (that never leaks the API token) for rejected or failed requests.
 RSpec.describe 'Full layout states' do
   it 'shows "No open tasks" when there are no open Tasks' do
     expect(render_tasks([])).to have_text('No open tasks')
