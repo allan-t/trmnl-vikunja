@@ -1,6 +1,8 @@
 # trmnl-vikunja
 A recipe for TRMNL for the task tracking app Vikunja
 
+Just want to use it on your TRMNL? Read the [user guide](docs/USER_GUIDE.md). The rest of this README is for contributors.
+
 ## Local preview and testing
 
 Requires Docker; the `trmnl/trmnlp` image provides everything else. Run from the repo root:
