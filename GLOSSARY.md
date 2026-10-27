@@ -19,3 +19,11 @@ _Avoid_: List, board
 **Priority**:
 A Vikunja Task's importance, from 0 (unset) to 5, shown on the display as an icon.
 _Avoid_: Urgency, importance
+
+**Mode**:
+How the Recipe chooses which Tasks to show: standard (Projects and Priority settings) or custom filter.
+_Avoid_: Source, type
+
+**Custom filter**:
+A filter written by the user in Vikunja's filter syntax that alone decides which Tasks are shown, replacing the Project and Priority settings.
+_Avoid_: Saved filter, query
