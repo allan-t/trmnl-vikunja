@@ -23,12 +23,17 @@
 {% endtemplate %}
 
 {% template error_state %}
-<div class="item"><div class="content"><span class="title title--small task-error">Could not load tasks. Check the Vikunja URL and API token.</span></div></div>
+{% comment %} Expects reason: 'filter' (Vikunja rejected the custom filter) or anything else for a connection or token failure. {% endcomment %}
+<div class="item"><div class="content"><span class="title title--small task-error">{% if reason == 'filter' %}Could not load tasks. Check the custom filter syntax.{% else %}Could not load tasks. Check the Vikunja URL and API token.{% endif %}</span></div></div>
+{% endtemplate %}
+
+{% template missing_filter_state %}
+<div class="item"><div class="content"><span class="title title--small task-error">Custom filter mode is on but no filter is set. Enter a Vikunja filter in the settings.</span></div></div>
 {% endtemplate %}
 
 {% template empty_state %}
-{% comment %} Expects filtering_projects (true when a Project filter is set). {% endcomment %}
-<div class="item"><div class="content"><span class="title title--small task-empty">{% if filtering_projects %}No open tasks in the selected Projects{% else %}No open tasks{% endif %}</span></div></div>
+{% comment %} Expects filtering_projects (true when a Project filter is set) and custom_mode (the user's own filter matched nothing). {% endcomment %}
+<div class="item"><div class="content"><span class="title title--small task-empty">{% if custom_mode %}No tasks match the custom filter{% elsif filtering_projects %}No open tasks in the selected Projects{% else %}No open tasks{% endif %}</span></div></div>
 {% endtemplate %}
 
 {% template overflow_count %}
@@ -111,9 +116,9 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, task_source_mode (custom_filter = the user's own filter already selected the Tasks, so project_filter is ignored), project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
+  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, task_source_mode (custom_filter = the user's own filter already selected the Tasks, so project_filter is ignored), custom_filter (the typed filter; blank in custom mode shows a prompt, never unfiltered Tasks), project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
   Layout files pass tasks_page: IDX_0, projects_page: IDX_1, utc_offset: trmnl.user.utc_offset and
-  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, because partials cannot read trmnl.
+  group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, custom_filter: trmnl.plugin_settings.custom_fields_values.custom_filter, because partials cannot read trmnl.
   group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second. Every Task is rendered; fit_script hides the ones that do not fit.
   Tasks carry only project_id, so the Project name is looked up in projects.
@@ -161,9 +166,23 @@
 {% assign group_setting = group_setting | append: '' | downcase %}
 {% if group_setting == 'false' or group_setting == 'no' or group_setting == '0' or group_setting == 'off' %}{% assign grouped = false %}{% endif %}
 
-{% if load_ok == false or tasks.size == 0 %}
+{% assign custom_mode = false %}
+{% if task_source_mode == 'custom_filter' %}{% assign custom_mode = true %}{% endif %}
+{% assign filter_missing = false %}
+{% assign filter_text = custom_filter | append: '' | strip %}
+{% if custom_mode and filter_text == '' %}{% assign filter_missing = true %}{% endif %}
+{% comment %}
+  A failed request still hands over its body, never its status. Vikunja's error body carries a numeric code: 4016-4019 and 4024 are
+  its invalid filter errors (4xx), while a bad token (401) has code 11. 5xx and unreachable hosts give an empty body, so no code.
+{% endcomment %}
+{% assign error_reason = 'connection' %}
+{% assign filter_error_codes = '4016,4017,4018,4019,4024' | split: ',' %}
+{% assign error_code = tasks_page.code | append: '' %}
+{% if custom_mode %}{% if filter_error_codes contains error_code %}{% assign error_reason = 'filter' %}{% endif %}{% endif %}
+
+{% if filter_missing or load_ok == false or tasks.size == 0 %}
   <div class="layout layout--col">
-    <div class="list">{% if load_ok %}{% render 'empty_state', filtering_projects: filtering_projects %}{% else %}{% render 'error_state' %}{% endif %}</div>
+    <div class="list">{% if filter_missing %}{% render 'missing_filter_state' %}{% elsif load_ok %}{% render 'empty_state', filtering_projects: filtering_projects, custom_mode: custom_mode %}{% else %}{% render 'error_state', reason: error_reason %}{% endif %}</div>
   </div>
 {% else %}
   {% assign shown = tasks %}
@@ -183,7 +202,7 @@
 
 <div class="title_bar">
   <span class="title">Vikunja Tasks</span>
-  {% if load_ok and tasks.size > 0 %}{% render 'overflow_count' %}{% endif %}
+  {% if load_ok and tasks.size > 0 and filter_missing == false %}{% render 'overflow_count' %}{% endif %}
 </div>
-{% if load_ok and tasks.size > 0 %}{% render 'fit_script' %}{% endif %}
+{% if load_ok and tasks.size > 0 and filter_missing == false %}{% render 'fit_script' %}{% endif %}
 {% endtemplate %}

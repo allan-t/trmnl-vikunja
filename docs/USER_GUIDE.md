@@ -58,6 +58,9 @@ Switch **Task source** to **Custom filter** and type a filter such as `done = fa
 ## Troubleshooting
 
 - **"Could not load tasks"**: the Base URL or API token is wrong, the token lacks read access to Tasks and Projects, or Vikunja can't be reached from the internet. Check the URL opens in a browser and create a fresh token.
+- **"Could not load tasks. Check the custom filter syntax."**: Vikunja rejected your filter in Custom filter mode. Check it against [Vikunja's filter syntax](https://vikunja.io/docs/filters). TRMNL gives the Recipe the error Vikunja sent back but not the HTTP status, so the Recipe recognises a rejected filter by Vikunja's filter error codes (4016-4019 and 4024). If your filter is fine and you still see the message above about the URL and API token, the problem is the connection or token.
+- **"Custom filter mode is on but no filter is set. Enter a Vikunja filter in the settings."**: **Task source** is set to Custom filter but **Custom filter** is empty. The Recipe never falls back to showing all Tasks; enter a filter, or switch **Task source** back to Standard.
+- **"No tasks match the custom filter"**: your filter is valid but matches no Tasks. Loosen it, or test it in Vikunja.
 - **"No open tasks"**: you have none, or your filters leave nothing. Clear **Projects to show** and **Priority levels to show** to check.
 - **"No open tasks in the selected Projects"**: none of the names in **Projects to show** match a Project with open Tasks. Check the spelling.
 - **Self-hosting**: your Vikunja must be reachable from TRMNL's servers, not only your home network.
