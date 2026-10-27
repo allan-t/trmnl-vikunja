@@ -7,9 +7,7 @@ polling_verb: get
 framework_version: latest
 serverless_language: ''
 refresh_interval_floor: ''
-polling_url: |-
-  {{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc
-  {{ base_url }}/api/v1/projects
+polling_url: "{{ base_url }}/api/v1/tasks?filter=done%20%3D%20false&sort_by=due_date&sort_by=priority&order_by=asc&order_by=desc\r\n{{ base_url }}/api/v1/projects"
 polling_headers: authorization=Bearer {{ api_token }}
 polling_body: ''
 id: 520678
