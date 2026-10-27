@@ -29,6 +29,14 @@ Renders every layout, grouped and ungrouped, into `docs/screenshots/<layout>-<gr
 
 Never commit a `.trmnlp.yml` with resolved values: `docker compose up` rewrites it, so keep the `{{ env.* }}` placeholders.
 
+## Releasing
+
+```sh
+bin/pack   # builds _build/trmnl-vikunja.zip, the file TRMNL imports (needs only Docker)
+```
+
+Pushing a version tag (for example `git tag v1.0.0 && git push origin v1.0.0`) runs `.github/workflows/release.yml`: tests and lint first, then `bin/pack`, then the zip is attached to a GitHub Release. This publishes a file; it never pushes to a live TRMNL Recipe. The zip leaves out the plugin `id` from `settings.yml`, so importing it creates a new Recipe.
+
 ## Adding a test
 
 Render the template with a fixed clock and mocked Vikunja responses, then assert on the visible text. One spec file per behaviour; Liquid partials live in `src/shared.liquid`:

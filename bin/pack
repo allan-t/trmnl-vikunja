@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Builds the importable Recipe zip (the same flat set of src/ files `trmnlp push` uploads) at _build/trmnl-vikunja.zip,
+# or at the path given as the first argument. The plugin id is left out of settings.yml so an import creates a new Recipe.
+# Needs Docker only: no TRMNL account or API key.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+out="${1:-_build/trmnl-vikunja.zip}"
+mkdir -p "$(dirname "$out")"
+rm -f "$out"
+docker run --rm --entrypoint ruby -v "$PWD:/plugin" -w /plugin trmnl/trmnlp -rzip -e '
+  Zip::File.open(ARGV[0], create: true) do |zip|
+    Dir["src/*"].sort.each do |file|
+      name = File.basename(file)
+      if name == "settings.yml"
+        zip.get_output_stream(name) { |entry| entry.write(File.read(file).sub(/^id: \d+\n/, "")) }
+      else
+        zip.add(name, file)
+      end
+    end
+  end
+' "$out"
+echo "Wrote $out"
