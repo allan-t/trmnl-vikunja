@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Ensure recipe plugin id is set
-        run: grep -q '^id: 520678$' src/settings.yml
+        run: "grep -q '^id: 520678$' src/settings.yml"
       - name: Push recipe to TRMNL
         env:
           TRMNL_API_KEY: ${{ secrets.TRMNL_API_KEY }}
