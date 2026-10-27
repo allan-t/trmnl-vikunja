@@ -114,17 +114,22 @@ RSpec.describe 'Polling config' do
     expect(settings['polling_headers']).to eq('authorization=Bearer {{ api_token }}')
   end
 
-  it 'takes the base URL, API token and grouping as settings, the token as a password field' do
+  it 'takes connection, filtering, grouping and sorting settings; token as password' do
     fields = settings['custom_fields'].reject { |f| f['field_type'] == 'author_bio' }.to_h { |f| [f['keyname'], f] }
 
     expect(fields.keys).to contain_exactly('base_url', 'api_token', 'task_source_mode', 'custom_filter', 'project_names', 'priority_levels',
-                                         'group_by_project')
+                                           'group_by_project', 'task_sort_field', 'task_sort_direction', 'project_sort_field',
+                                           'project_sort_direction')
     expect(fields['base_url']['field_type']).to eq('string')
     expect(fields['api_token']['field_type']).to eq('password')
     expect(fields['task_source_mode']['field_type']).to eq('select')
     expect(fields['task_source_mode']['default']).to eq('standard')
     expect(fields['task_source_mode']['options'].flat_map(&:values)).to eq(%w[standard custom_filter])
     expect(fields['custom_filter']['optional']).to be(true)
+    expect(fields['task_sort_field']['default']).to eq('due_date')
+    expect(fields['task_sort_direction']['default']).to eq('asc')
+    expect(fields['project_sort_field']['default']).to eq('unsorted')
+    expect(fields['project_sort_direction']['default']).to eq('asc')
   end
 
   it 'does not hardcode a token' do

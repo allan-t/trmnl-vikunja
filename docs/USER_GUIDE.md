@@ -34,10 +34,14 @@ The form groups the filter settings under **Filter options** and Group by Projec
 | Projects to show | Standard mode only (hidden in Custom filter mode). Type Project names separated by commas, for example `Home, Work`. Only Tasks from those Projects appear. Names aren't case sensitive. Leave empty to show every Project. A name that matches no Project is ignored. |
 | Priority levels to show | Standard mode only (hidden in Custom filter mode). Pick the Priorities to show (Unset, Low, Medium, High, Urgent, Do now). Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to pick several. Leave empty to show all. |
 | Group by Project | On: Tasks sit under a header for each Project. Off: one list of `Project - Task` rows. |
+| Task sort field | `Due date` (default), `Priority`, `Project`, `Alphabetical`, or `Unsorted`. In grouped mode this sorts Tasks inside each Project group. |
+| Task sort direction | `Ascending` or `Descending` for Task sort. Ignored when Task sort field is `Unsorted`. |
+| Project group sort field | Grouped mode only. `Unsorted` (default), `Alphabetical`, or `Project filter order`. |
+| Project group sort direction | Grouped mode only. `Ascending` or `Descending` for Project header order. Ignored when Project group sort field is `Unsorted`. |
 
 ## What you'll see
 
-Open Tasks are sorted by due date, then by Priority. Tasks without a due date come last. Each row can show a Priority icon (`!` for Medium and High, `!!` for Urgent and Do now) and a due label such as *Today*, *Tomorrow*, *Overdue 2d* or a date.
+Open Tasks follow your sort settings. With the default Task sort (`Due date`), Tasks without a due date come last. Each row can show a Priority icon (`!` for Medium and High, `!!` for Urgent and Do now) and a due label such as *Today*, *Tomorrow*, *Overdue 2d* or a date.
 
 The Recipe fills the space your layout has. Tasks that don't fit are left out, and the title bar says how many (for example *+7 more*). Bigger layouts show more Tasks.
 
@@ -49,7 +53,7 @@ The Recipe fills the space your layout has. Tasks that don't fit are left out, a
 
 ## Custom filter mode
 
-Switch **Filter mode** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Tasks are still sorted by due date, then Priority, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters). For compatibility with copied filters, web-UI camelCase fields are accepted and rewritten to API snake_case.
+Switch **Filter mode** to **Custom filter** and type a filter such as `done = false && (priority >= 3 || due_date < now+7d)`. Your Task and Project sort settings still apply, and **Group by Project** still works. The filter's syntax is explained in the [Vikunja filter documentation](https://vikunja.io/docs/filters). For compatibility with copied filters, web-UI camelCase fields are accepted and rewritten to API snake_case.
 
 ## Limits
 

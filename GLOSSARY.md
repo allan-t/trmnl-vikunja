@@ -27,3 +27,11 @@ _Avoid_: Source, type
 **Custom filter**:
 A filter written by the user in Vikunja's filter syntax that alone decides which Tasks are shown, replacing the Project and Priority settings.
 _Avoid_: Saved filter, query
+
+**Task sort**:
+How shown Tasks are ordered, either across one list or within each Project group.
+_Avoid_: Ranking, weighting
+
+**Project group sort**:
+How Project headers are ordered when Group by Project is on.
+_Avoid_: Project ranking, board order

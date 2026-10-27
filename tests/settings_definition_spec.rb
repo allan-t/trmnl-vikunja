@@ -17,6 +17,12 @@ RSpec.describe 'Settings definition' do
     expect(by_key.fetch('group_by_project')['group']).to eq('Display options')
   end
 
+  it 'puts sorting controls under Display options' do
+    display_fields = fields.select { |f| f['group'] == 'Display options' }
+    expect(display_fields.map { |f| f['keyname'] }).to eq(%w[group_by_project task_sort_field task_sort_direction project_sort_field
+                                                              project_sort_direction])
+  end
+
   it 'leaves the connection settings ungrouped' do
     expect(by_key.values_at('base_url', 'api_token').map { |f| f['group'] }).to eq([nil, nil])
   end
@@ -39,5 +45,12 @@ RSpec.describe 'Settings definition' do
   it 'labels every filter control with the mode it applies to' do
     expect(by_key.fetch('custom_filter')['description']).to include('Custom filter mode only.')
     %w[project_names priority_levels].each { |k| expect(by_key.fetch(k)['description']).to include('Standard mode only.') }
+  end
+
+  it 'defaults task sorting to due date ascending and project group sorting to unsorted ascending' do
+    expect(by_key.fetch('task_sort_field')['default']).to eq('due_date')
+    expect(by_key.fetch('task_sort_direction')['default']).to eq('asc')
+    expect(by_key.fetch('project_sort_field')['default']).to eq('unsorted')
+    expect(by_key.fetch('project_sort_direction')['default']).to eq('asc')
   end
 end
