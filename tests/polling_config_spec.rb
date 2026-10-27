@@ -21,7 +21,7 @@ RSpec.describe 'Polling config' do
   end
 
   it 'builds both URLs from the base URL setting' do
-    expect(urls.map { |u| u.split('?').first }).to eq(%w[https://v.example/api/v1/tasks https://v.example/api/v1/projects])
+    expect(urls.map { |u| u.split('?').first }).to eq(%w[https://v.example/api/v2/tasks https://v.example/api/v2/projects])
   end
 
   it 'requests only open Tasks' do

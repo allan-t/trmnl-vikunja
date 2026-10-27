@@ -53,5 +53,5 @@ The helpers live in `tests/spec_helper.rb`. CI (`.github/workflows/test.yml`) ru
 
 ## References
 
-- [Vikunja API docs (swagger)](https://try.vikunja.io/api/v1/docs)
+- [Vikunja API v2 docs](https://try.vikunja.io/api/v2/docs)
 - [TRMNL developer docs](https://docs.usetrmnl.com/go/)

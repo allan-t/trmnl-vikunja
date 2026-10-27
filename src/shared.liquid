@@ -111,8 +111,8 @@
 
 {% template task_screen %}
 {% comment %}
-  Expects tasks (open Tasks, first page), projects, utc_offset, project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
-  Layout files pass tasks: IDX_0.data, projects: IDX_1.data, utc_offset: trmnl.user.utc_offset and
+  Expects tasks_page and projects_page (the v2 collection responses, whose lists sit in `items`), utc_offset, project_filter (comma-separated Project names, empty = all Projects, matched case-insensitively) and columns (1 or 2, default 1: how many columns the Tasks flow through).
+  Layout files pass tasks_page: IDX_0, projects_page: IDX_1, utc_offset: trmnl.user.utc_offset and
   group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, because partials cannot read trmnl.
   group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers, in order of each Project's most urgent Task.
   Two columns fill the first before the second. Every Task is rendered; fit_script hides the ones that do not fit.
@@ -120,16 +120,17 @@
 {% endcomment %}
 {% comment %} ISO due dates sorting before this are Vikunja's zero date, i.e. no due date. {% endcomment %}
 {% assign dated_from = "1970" %}
+{% assign empty_list = '' | split: ',' %}
 {% assign utc_offset = utc_offset | default: 0 %}
-{% comment %} A failed or unauthorised request yields something other than a JSON array. {% endcomment %}
-{% assign tasks_first_char = tasks | json | slice: 0 %}
-{% assign projects_first_char = projects | json | slice: 0 %}
+{% comment %} A failed or unauthorised request yields no pagination fields; an empty list has page but null items. {% endcomment %}
 {% assign load_ok = false %}
-{% if tasks_first_char == '[' and projects_first_char == '[' %}{% assign load_ok = true %}{% endif %}
+{% if tasks_page.page != nil and projects_page.page != nil %}{% assign load_ok = true %}{% endif %}
+{% assign tasks = tasks_page.items | default: empty_list %}
+{% assign projects = projects_page.items | default: empty_list %}
 {% if load_ok %}
   {% comment %} Vikunja sorts unset (zero) due dates first; list them last, keeping order otherwise. {% endcomment %}
   {% assign dated = tasks | where_exp: 't', 't.due_date >= dated_from' %}
-  {% assign undated = tasks | where_exp: 't', 't.due_date < dated_from' %}
+  {% assign undated = tasks | where_exp: 't', 't.due_date == nil or t.due_date < dated_from' %}
   {% assign tasks = dated | concat: undated %}
   {% assign wanted_names = project_filter | append: '' | downcase | split: ',' %}
   {% assign wanted_clean = '' | split: ',' %}

@@ -20,4 +20,10 @@ RSpec.describe 'Full layout rows' do
 
     expect(render_tasks(tasks)).to have_text(/Dated B.*Dated D.*Undated A.*Undated C/m)
   end
+
+  it 'treats a null due date as undated' do
+    tasks = [build_task(1, title: 'No date', due_date: nil), build_task(2, title: 'Dated', due_date: '2030-01-05T09:00:00Z')]
+
+    expect(render_tasks(tasks)).to have_text(/Dated.*No date/m)
+  end
 end
