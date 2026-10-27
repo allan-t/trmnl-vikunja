@@ -13,4 +13,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rhysd/actionlint@v1
+      - name: Lint GitHub workflow files
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest
