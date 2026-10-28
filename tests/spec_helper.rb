@@ -35,8 +35,9 @@ def build_task(id = 1, **overrides)
 end
 
 module RenderHelpers
-  def render_screen(layout: 'full', mocks: vikunja_mocks, variables: {}, custom_fields: CUSTOM_FIELDS)
-    trmnl.render(view: layout, now: FIXED_NOW, custom_fields:, mocks:, variables:)
+  # `screen` picks the device and orientation, e.g. device: 'v2', orientation: :portrait for TRMNL X in portrait.
+  def render_screen(layout: 'full', mocks: vikunja_mocks, variables: {}, custom_fields: CUSTOM_FIELDS, **screen)
+    trmnl.render(view: layout, now: FIXED_NOW, custom_fields:, mocks:, variables:, **screen)
   end
 
   def render_tasks(tasks, **) = render_screen(mocks: vikunja_mocks(tasks:), **)
