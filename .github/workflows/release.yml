@@ -22,4 +22,11 @@ jobs:
       - name: Attach the Recipe zip to a GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "trmnl-vikunja-${GITHUB_REF_NAME}.zip" --generate-notes --verify-tag
+        run: |
+          zip="trmnl-vikunja-${GITHUB_REF_NAME}.zip"
+          # Creating a release in the GitHub UI also creates the tag, so the release can already exist.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$zip" --generate-notes --verify-tag
+          fi
