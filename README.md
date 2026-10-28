@@ -1,58 +1,28 @@
 # trmnl-vikunja
-A recipe for TRMNL for the task tracking app Vikunja
 
-Just want to use it on your TRMNL? Read the [user guide](docs/USER_GUIDE.md). The rest of this README is for contributors.
+Show your open [Vikunja](https://vikunja.io) tasks on your [TRMNL](https://trmnl.com) e-ink display.
 
-## Local preview and testing
+![Full layout](docs/screenshots/full-grouped.png)
 
-Requires Docker; the `trmnl/trmnlp` image provides everything else. Run from the repo root:
+- Works with Vikunja Cloud and self-hosted Vikunja (2.4.0 or newer).
+- Fits all four TRMNL layouts: full, half horizontal, half vertical and quadrant.
+- Filter by project and priority, or write your own Vikunja filter.
+- Group tasks by project, sort them, and see priority icons and due labels (*Today*, *Overdue 2d*).
 
-```sh
-# Preview at http://localhost:4567 (copy .env.example to .env and set VIKUNJA_API_TOKEN; the base URL defaults to https://app.vikunja.cloud)
-docker compose up
+## Quick start
 
-# Run the RSpec tests in tests/ (fixture render + polling config)
-docker compose run --rm test
+1. Download `trmnl-vikunja-<version>.zip` from the [latest release](https://github.com/allan-t/trmnl-vikunja/releases/latest). Don't unzip it.
+2. In TRMNL, go to **Plugins > Private Plugin**, add a new plugin and import the zip as a Recipe.
+3. In Vikunja, create an API token under **Settings > API Tokens** with read access to **Tasks** and **Projects**.
+4. Paste the token into the plugin's **Vikunja API token** setting. If you self-host, also set **Vikunja base URL**.
+5. Add the plugin to a playlist.
 
-# Lint the Recipe
-docker run --rm -v "$PWD:/plugin" trmnl/trmnlp lint
-```
+The [user guide](docs/USER_GUIDE.md) covers every setting, custom filters, limits and troubleshooting.
 
-`src/settings.yml` holds the polling config and settings. `src/full.liquid`, `half_horizontal.liquid`, `half_vertical.liquid` and `quadrant.liquid` are the four layouts; they all render the shared `task_screen` partial in `src/shared.liquid`.
-Tests mock the Vikunja API with fixtures in `tests/fixtures/` and a fixed clock (`now:`).
+## Help and contact
 
-## Layout screenshots
+Something not working? Check [Troubleshooting](docs/USER_GUIDE.md#troubleshooting). For questions, bugs or ideas, [open an issue](https://github.com/allan-t/trmnl-vikunja/issues) on the [GitHub project](https://github.com/allan-t/trmnl-vikunja).
 
-```sh
-bin/screenshots
-```
+## Contributing
 
-Renders every layout, grouped and ungrouped, into `docs/screenshots/<layout>-<grouped|ungrouped>.png` from fixture data (`tests/fixtures/screenshot_*.json`) and a fixed clock. It needs only Docker: no Vikunja token, and `.trmnlp.yml` is not touched. Output is deterministic (checked: two runs, and a fresh run against the committed images, are byte-identical), so a diff in the images is a real change. Commit them with layout changes. CI reruns `bin/screenshots` and fails if `git status --porcelain docs/screenshots` shows anything (changed, new or deleted images).
-
-Never commit a `.trmnlp.yml` with resolved values: `docker compose up` rewrites it, so keep the `{{ env.* }}` placeholders.
-
-## Releasing
-
-```sh
-bin/pack   # builds _build/trmnl-vikunja.zip, the file TRMNL imports (needs only Docker)
-```
-
-Pushing a version tag (for example `git tag v1.0.0 && git push origin v1.0.0`) runs `.github/workflows/release.yml`: tests and lint first, then `bin/pack`, then the zip is attached to a GitHub Release. This publishes a file; it never pushes to a live TRMNL Recipe. The zip leaves out the plugin `id` from `settings.yml`, so importing it creates a new Recipe.
-
-## Adding a test
-
-Render the template with a fixed clock and mocked Vikunja responses, then assert on the visible text. One spec file per behaviour; Liquid partials live in `src/shared.liquid`:
-
-```ruby
-it 'shows the Project and Task' do
-  expect(render_tasks([build_task(title: 'Buy milk')])).to have_text('Buy milk')
-end
-```
-
-The helpers live in `tests/spec_helper.rb`. CI (`.github/workflows/test.yml`) runs the tests on every pull request. It also runs `trmnlp lint`.
-
-## References
-
-- [Vikunja API v2 docs](https://try.vikunja.io/api/v2/docs)
-- [TRMNL developer docs](https://docs.usetrmnl.com/go/)
-- [TRMNL custom plugin form builder](https://help.trmnl.com/en/articles/10513740-custom-plugin-form-builder): every `custom_fields` key in `src/settings.yml`, including `group` and `conditional_validation` (hides or shows fields by another field's value). The page is long and gets truncated when fetched, so read past the first page before concluding a key does not exist.
+To run, test or change the Recipe, see [CONTRIBUTING.md](CONTRIBUTING.md).
