@@ -36,7 +36,7 @@ Never commit a `.trmnlp.yml` with resolved values: `docker compose up` rewrites 
 bin/pack   # builds _build/trmnl-vikunja.zip, the file TRMNL imports (needs only Docker)
 ```
 
-Pushing a version tag (for example `git tag v1.0.0 && git push origin v1.0.0`) runs `.github/workflows/release.yml`: tests and lint first, then `bin/pack`, then the zip is attached to a GitHub Release. This publishes a file; it never pushes to a live TRMNL Recipe. The zip leaves out the plugin `id` from `settings.yml`, so importing it creates a new Recipe.
+Pushing a version tag (for example `git tag v1.0.0 && git push origin v1.0.0`) runs `.github/workflows/release.yml`: tests and lint first, then `bin/pack`, then the zip is attached to a GitHub Release (created if needed, or added to the one you already made in the GitHub UI, which creates the tag too). This publishes a file; it never pushes to a live TRMNL Recipe. The zip leaves out the plugin `id` from `settings.yml`, so importing it creates a new Recipe.
 
 ## Submitting to the Recipes directory
 

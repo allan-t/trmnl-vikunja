@@ -27,6 +27,7 @@ RSpec.describe 'CI workflow' do
     expect(release).to include("tags: ['v*']")
     expect(release).to include('bin/pack')
     expect(release).to include('gh release create')
+    expect(release).to include('gh release upload')
     expect(release).not_to include('TRMNL_API_KEY')
     expect(release).not_to include('trmnlp push')
   end
