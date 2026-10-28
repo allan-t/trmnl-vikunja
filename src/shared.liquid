@@ -67,6 +67,7 @@
       var items = Array.prototype.slice.call(flow.querySelectorAll('.item'));
       items.forEach(function (item) { item.hidden = false; });
       flow.style.columnCount = flow.getAttribute('data-columns');
+      flow.style.columnFill = 'auto';
       flow.style.height = '';
       var top = flow.getBoundingClientRect().top;
       var bottom = bar ? bar.getBoundingClientRect().top : window.innerHeight;
@@ -83,6 +84,7 @@
         var next = item.nextElementSibling;
         if (item.classList.contains('group-header') && (!next || next.hidden)) item.hidden = true;
       });
+      if (hiddenTasks === 0) flow.style.columnFill = 'balance';
       if (count) {
         count.textContent = hiddenTasks === 0 ? '' : '+' + hiddenTasks + ' more';
         count.hidden = hiddenTasks === 0;
@@ -125,7 +127,7 @@
   Layout files pass tasks_page: IDX_0, projects_page: IDX_1, utc_offset: trmnl.user.utc_offset and
   group_setting: trmnl.plugin_settings.custom_fields_values.group_by_project, project_filter: trmnl.plugin_settings.custom_fields_values.project_names, task_source_mode: trmnl.plugin_settings.custom_fields_values.task_source_mode, custom_filter: trmnl.plugin_settings.custom_fields_values.custom_filter, task_sort_field: trmnl.plugin_settings.custom_fields_values.task_sort_field, task_sort_direction: trmnl.plugin_settings.custom_fields_values.task_sort_direction, project_sort_field: trmnl.plugin_settings.custom_fields_values.project_sort_field, project_sort_direction: trmnl.plugin_settings.custom_fields_values.project_sort_direction, because partials cannot read trmnl.
   group_setting is the Group by Project setting: grouping is on unless it is false, no, 0 or off (unset = on). Grouping lists Tasks under Project headers.
-  Two columns fill the first before the second. Every Task is rendered; fit_script hides the ones that do not fit.
+  Two columns fill the first before the second, until every Task fits: then fit_script balances them so the screen is not half blank. Every Task is rendered; fit_script hides the ones that do not fit.
   Tasks carry only project_id, so the Project name is looked up in projects.
 {% endcomment %}
 {% assign dated_from = "1970" %}

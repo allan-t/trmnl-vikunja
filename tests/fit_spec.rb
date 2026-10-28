@@ -60,3 +60,28 @@ RSpec.describe 'Fit script start-up' do
     expect(shared).not_to match(/addEventListener\(\s*['"]load['"]/)
   end
 end
+
+# A two-column Layout that has room for every Task should use both columns, not pile them all into
+# the first and leave the right half of the screen blank (most visible on TRMNL X).
+SCREENS = {
+  'TRMNL OG' => { device: 'og_png' },
+  'TRMNL X landscape' => { device: 'v2' },
+  'TRMNL X portrait' => { device: 'v2', orientation: :portrait }
+}.freeze
+
+%w[full half_horizontal].each do |layout_name|
+  SCREENS.each do |name, screen|
+    RSpec.describe "#{layout_name} layout on #{name}" do
+      it 'spreads Tasks that all fit across both columns' do
+        tasks = (1..8).map { |i| build_task(i, title: format('Chore %02d', i)) }
+        page = render_tasks(tasks, layout: layout_name, **screen)
+        script = "(() => { const w = document.documentElement.clientWidth; " \
+                 "return [...document.querySelectorAll('.task:not([hidden])')].map((t) => t.getBoundingClientRect().left / w); })()"
+        lefts = page.evaluate(script)
+
+        expect(lefts.size).to eq(8)
+        expect(lefts.max).to be > 0.4
+      end
+    end
+  end
+end
