@@ -53,4 +53,15 @@ RSpec.describe 'Settings definition' do
     expect(by_key.fetch('project_sort_field')['default']).to eq('unsorted')
     expect(by_key.fetch('project_sort_direction')['default']).to eq('asc')
   end
+
+  it 'lists up to two approved TRMNL categories on the author bio' do
+    approved = %w[album analytics art calendar comics crm custom discovery ecommerce education email entertainment environment
+                  finance games humor images kpi life marketing morbid nature news personal productivity programming sales sports travel]
+    categories = by_key.fetch('author_bio')['category'].to_s.split(',').map(&:strip)
+
+    expect(categories).to include('productivity')
+    expect(categories.size).to be_between(1, 2)
+    expect(categories - approved).to be_empty
+    expect(categories).not_to include('morbid')
+  end
 end
