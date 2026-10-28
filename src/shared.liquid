@@ -83,8 +83,8 @@
         count.hidden = hiddenTasks === 0;
       }
     }
-    fit();
-    window.addEventListener('load', fit);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fit);
+    else fit();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   })();
 </script>

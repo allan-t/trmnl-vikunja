@@ -51,3 +51,12 @@ RSpec.describe 'Fitting across Layouts' do
     expect(screen.evaluate(script)).to be(true)
   end
 end
+
+RSpec.describe 'Fit script start-up' do
+  let(:shared) { File.read(File.expand_path('../src/shared.liquid', __dir__)) }
+
+  it 'fits on DOMContentLoaded, not on the window load event' do
+    expect(shared).to include("addEventListener('DOMContentLoaded'")
+    expect(shared).not_to match(/addEventListener\(\s*['"]load['"]/)
+  end
+end
