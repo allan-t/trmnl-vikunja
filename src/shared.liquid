@@ -59,6 +59,21 @@
 </style>
 <script>
   (function () {
+    // break-after: avoid is not honoured everywhere, so move a header that ends a column down to the next one.
+    // Returns false if a header is still left alone at the end of a column.
+    function keepHeadersWithTasks(items) {
+      var headers = items.filter(function (item) { return item.classList.contains('group-header'); });
+      items.forEach(function (item) { item.style.breakBefore = ''; });
+      for (var pass = 0; pass <= headers.length; pass += 1) {
+        var orphan = headers.filter(function (header) {
+          var next = header.nextElementSibling;
+          return next && !next.hidden && next.getBoundingClientRect().left > header.getBoundingClientRect().left + 1;
+        })[0];
+        if (!orphan) return true;
+        orphan.style.breakBefore = 'column';
+      }
+      return false;
+    }
     function fit() {
       var flow = document.querySelector('.task-flow');
       var bar = document.querySelector('.title_bar');
@@ -73,6 +88,7 @@
       var bottom = bar ? bar.getBoundingClientRect().top : window.innerHeight;
       flow.style.height = Math.max(0, bottom - top) + 'px';
       var right = flow.getBoundingClientRect().right;
+      keepHeadersWithTasks(items);
       var hiddenTasks = 0;
       items.forEach(function (item) {
         if (item.getBoundingClientRect().left >= right - 1) {
@@ -84,7 +100,13 @@
         var next = item.nextElementSibling;
         if (item.classList.contains('group-header') && (!next || next.hidden)) item.hidden = true;
       });
-      if (hiddenTasks === 0) flow.style.columnFill = 'balance';
+      if (hiddenTasks === 0) {
+        flow.style.columnFill = 'balance';
+        if (!keepHeadersWithTasks(items)) {
+          flow.style.columnFill = 'auto';
+          keepHeadersWithTasks(items);
+        }
+      }
       if (count) {
         count.textContent = hiddenTasks === 0 ? '' : '+' + hiddenTasks + ' more';
         count.hidden = hiddenTasks === 0;
