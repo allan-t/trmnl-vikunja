@@ -119,6 +119,7 @@ custom_fields:
 - keyname: author_bio
   field_type: author_bio
   name: About This Recipe
+  category: productivity
   description: Displays your open Vikunja Tasks across all Projects.
   github_url: https://github.com/allan-t/trmnl-vikunja
 name: Vikunja Tasks
