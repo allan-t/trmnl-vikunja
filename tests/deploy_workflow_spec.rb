@@ -4,12 +4,12 @@ require 'yaml'
 
 # CI only checks the repo: it runs tests and lint on pushes to main and on pull requests, and never
 # pushes to a live TRMNL Recipe. The release workflow only attaches a zip to a GitHub Release. These specs
-# show neither has a deploy step or API key, and that the README does not tell people to set one up.
+# show neither has a deploy step or API key, and that CONTRIBUTING.md does not tell people to set one up.
 RSpec.describe 'CI workflow' do
   let(:workflow_path) { File.expand_path('../.github/workflows/test.yml', __dir__) }
   let(:workflow) { File.read(workflow_path) }
   let(:workflow_yaml) { YAML.safe_load(workflow, aliases: true) }
-  let(:readme) { File.read(File.expand_path('../README.md', __dir__)) }
+  let(:contributing) { File.read(File.expand_path('../CONTRIBUTING.md', __dir__)) }
 
   it 'runs validation jobs without a deploy step' do
     expect { workflow_yaml }.not_to raise_error
@@ -32,9 +32,9 @@ RSpec.describe 'CI workflow' do
   end
 
   it 'documents that CI only checks the repo and never pushes to TRMNL' do
-    expect(readme).to include('CI')
-    expect(readme).to include('lint')
-    expect(readme).not_to include('private plugin')
-    expect(readme).not_to include('TRMNL_API_KEY')
+    expect(contributing).to include('CI')
+    expect(contributing).to include('lint')
+    expect(contributing).not_to include('private plugin')
+    expect(contributing).not_to include('TRMNL_API_KEY')
   end
 end
