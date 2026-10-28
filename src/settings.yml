@@ -123,5 +123,5 @@ custom_fields:
   category: productivity
   github_url: https://github.com/allan-t/trmnl-vikunja
 name: Vikunja Tasks
-description: Open Vikunja Tasks at a glance
+description: Display Vikunja Tasks at a glance
 refresh_interval: 15
