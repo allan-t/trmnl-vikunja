@@ -38,6 +38,10 @@ bin/pack   # builds _build/trmnl-vikunja.zip, the file TRMNL imports (needs only
 
 Pushing a version tag (for example `git tag v1.0.0 && git push origin v1.0.0`) runs `.github/workflows/release.yml`: tests and lint first, then `bin/pack`, then the zip is attached to a GitHub Release. This publishes a file; it never pushes to a live TRMNL Recipe. The zip leaves out the plugin `id` from `settings.yml`, so importing it creates a new Recipe.
 
+## Submitting to the Recipes directory
+
+Publish from your own plugin in the TRMNL dashboard (its settings page has a publish action), not from the release zip; see TRMNL's [Plugin recipes](https://help.trmnl.com/en/articles/10122094-plugin-recipes) help article. Review runs CHEF first, then a person. The zip from `bin/pack` is for installing from GitHub: it leaves out the plugin `id` from `settings.yml`, and `tests/pack_spec.rb` checks that. Before submitting, run through [TRMNL's checklist](https://trmnl.com/blog/plugin-recipe-publishing-tips).
+
 ## Adding a test
 
 Render the template with a fixed clock and mocked Vikunja responses, then assert on the visible text. One spec file per behaviour; Liquid partials live in `src/shared.liquid`:
