@@ -85,3 +85,14 @@ SCREENS = {
     end
   end
 end
+
+RSpec.describe 'Hidden Tasks stay in order' do
+  it 'never shows a Task that comes after a hidden one' do
+    tasks = [build_task(1, title: 'Short A'), build_task(2, title: 'Short B'), build_task(3, title: 'Dated', due_date: '2030-01-04T10:00:00Z')] +
+            (4..20).map { |i| build_task(i, title: format('Chore %02d', i)) }
+    page = render_tasks(tasks, layout: 'quadrant')
+    hidden_flags = page.evaluate("(() => [...document.querySelectorAll('.task')].map((t) => t.hidden))()")
+
+    expect(hidden_flags).to eq(hidden_flags.sort_by { |hidden| hidden ? 1 : 0 })
+  end
+end
